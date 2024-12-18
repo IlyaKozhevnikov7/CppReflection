@@ -1,0 +1,12 @@
+*Build
+Examples/
+
+# Visual Studio files
+.vs
+**.sln
+**.vcxproj
+**.vcxproj.filters
+**.vcxproj.user
+**.csproj
+
+**/obj
