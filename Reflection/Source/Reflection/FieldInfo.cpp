@@ -3,10 +3,10 @@
 
 namespace Reflection
 {
-	void* FieldInfo::GetValueInternal(int8_t* object) const
+	void* FieldRef::GetValueInternal(int8_t* object) const
 	{
-		return IsStatic()
-			? (void*)m_ValueOffset
-			: (void*)(object + m_ValueOffset);
+		return m_Info->IsStatic()
+			? (void*)m_Info->GetOffset()
+			: (void*)(object + m_Info->GetOffset() + m_Offset);
 	}
 }

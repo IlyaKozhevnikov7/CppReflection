@@ -22,6 +22,12 @@ namespace Reflection
 
 		#include "Internal/TypeMemberIterators.inl"
 
+		struct ParentInfo
+		{
+			const Type*		type;
+			const size_t	offset;
+		};
+
 		using GetActualTypeSignature = const Type*(*)(void*);
 		using CreateInstanceSignature = void*(*)();
 
@@ -45,9 +51,21 @@ namespace Reflection
 			return m_Namespace;
 		}
 
-		size_t GetParentTypeCount(bool all = true) const;
+		size_t GetParentCount() const
+		{
+			if (IsEnum())
+				return 0;
 
-		void GetParentTypes(const Type** types, bool all = true) const;
+			return m_InternalInfo.classInfo.parentInfos.size();
+		}
+
+		std::span<const ParentInfo> GetParentTypes() const
+		{
+			if (IsEnum())
+				return std::span<const ParentInfo>();
+
+			return std::span<const ParentInfo>(m_InternalInfo.classInfo.parentInfos.data(), m_InternalInfo.classInfo.parentInfos.size());
+		}
 
 		BitMask<TypeFlag> GetFlags() const
 		{
@@ -78,7 +96,7 @@ namespace Reflection
 		{
 			return IsEnum()
 				? false
-				: m_InternalInfo.classInfo.parentTypes.empty() == false;
+				: m_InternalInfo.classInfo.parentInfos.empty() == false;
 		}
 
 		const Type* GetEnumBaseType() const
@@ -95,50 +113,9 @@ namespace Reflection
 				: std::span<const EnumValue>();
 		}
 
-		template<typename TAction>
-		void ForEachParent(TAction action, bool all = true) const
-		{
-			if (IsEnum())
-				return;
-
-			for (auto parentType : m_InternalInfo.classInfo.parentTypes)
-			{
-				action(parentType);
-
-				if (all)
-					parentType->ForEachParent(action);
-			}
-		}
-
-		template<typename TAction>
-		void ForEachField(TAction action) const
-		{
-			if (IsEnum())
-				return;
-
-			for (auto parentType : m_InternalInfo.classInfo.parentTypes)
-				if (parentType != nullptr)
-					parentType->ForEachField(action);
-
-			for (auto& info : m_InternalInfo.classInfo.fieldInfos)
-				action(info);
-		}
-
-		template<typename TAction>
-		void ForEachMethod(TAction action) const
-		{
-			if (IsEnum())
-				return;
-
-			for (auto parentType : m_InternalInfo.classInfo.parentTypes)
-				if (parentType != nullptr)
-					parentType->ForEachMethod(action);
-
-			for (auto& info : m_InternalInfo.classInfo.methodInfos)
-				action(info);
-		}
-
 		const FieldInfo* GetField(const char* name) const;
+
+		FieldRef GetFieldRef(const char* name) const;
 
 		const MethodInfo* GetMethod(const char* name) const;
 
@@ -161,10 +138,6 @@ namespace Reflection
 
 	private:
 
-		size_t GetParentTypeCountInternal(bool all) const;
-
-	private:
-
 		#include "Internal/TypeCore.inl"
 		TypeInternalInfo m_InternalInfo;
 
@@ -184,13 +157,13 @@ namespace Reflection
 		*	Construct class/struct type
 		*/
 		template<typename T>
-		Type(const char* namespaceName, const char* name, std::initializer_list<const Type*> parentTypes, std::initializer_list<FieldInfo> fieldInfos, std::initializer_list<MethodInfo> methodInfos, GetActualTypeSignature getActualType, T*) :
+		Type(const char* namespaceName, const char* name, std::initializer_list<ParentInfo> parentInfos, std::initializer_list<FieldInfo> fieldInfos, std::initializer_list<MethodInfo> methodInfos, GetActualTypeSignature getActualType, T*) :
 			MemberInfo({}, name),
 			m_Size(Generation::SizeOf<T>),
 			m_Namespace(namespaceName),
 			m_Flags(ExcludeFlags<T>::Flags),
 			m_GetActualType(getActualType),
-			m_InternalInfo(parentTypes, fieldInfos, methodInfos, (T*)nullptr)
+			m_InternalInfo(parentInfos, fieldInfos, methodInfos, (T*)nullptr)
 		{
 		}
 
@@ -199,13 +172,13 @@ namespace Reflection
 		*	Template type
 		*/
 		template<typename T>
-		Type(const char* templateName, const char* namespaceName, const char* name, std::initializer_list<const Type*> parentTypes, std::initializer_list<FieldInfo> fieldInfos, std::initializer_list<MethodInfo> methodInfos, GetActualTypeSignature getActualType, T*) :
+		Type(const char* templateName, const char* namespaceName, const char* name, std::initializer_list<ParentInfo> parentInfos, std::initializer_list<FieldInfo> fieldInfos, std::initializer_list<MethodInfo> methodInfos, GetActualTypeSignature getActualType, T*) :
 			MemberInfo({}, name),
 			m_Size(Generation::SizeOf<T>),
 			m_Namespace(namespaceName),
 			m_Flags(ExcludeFlags<T>::Flags),
 			m_GetActualType(getActualType),
-			m_InternalInfo(templateName, parentTypes, fieldInfos, methodInfos, (T*)nullptr)
+			m_InternalInfo(templateName, parentInfos, fieldInfos, methodInfos, (T*)nullptr)
 		{
 		}
 

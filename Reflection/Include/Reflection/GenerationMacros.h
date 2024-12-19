@@ -142,7 +142,7 @@
 #define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_NO_PARENT_INFO { },
 
 #define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_PARENT_INFO_BEGIN {
-#define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_PARENT_INFO(...) TypeOf<__VA_ARGS__>::Get(),
+#define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_PARENT_INFO(...) { TypeOf<__VA_ARGS__>::Get(), (const size_t)((uint8_t*)(__VA_ARGS__*)(__CURRENT_TYPE__*)(sizeof(__CURRENT_TYPE__)) - (uint8_t*)(__CURRENT_TYPE__*)sizeof(__CURRENT_TYPE__)) },
 #define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_PARENT_INFO_END },
 
 /*
@@ -260,7 +260,7 @@
 		} \
 
 #define __GEN_REFLECTION_TYPE_INLINE_METHOD_SIGNATURES_BEGIN \
-	public: \
+	private: \
 		struct __GEN_REFLECTION_METHOD_SIGNATURES final \
 		{ \
 			friend Reflection::TypeOf<__THIS_TYPE__>; \

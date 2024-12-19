@@ -32,15 +32,15 @@ struct ExcludeFlags
 
 struct ClassInfo
 {
-	const std::vector<const Type*>	parentTypes;
-	const std::vector<FieldInfo>	fieldInfos;
-	const std::vector<MethodInfo>	methodInfos;
+	const std::vector<ParentInfo> parentInfos;
+	const std::vector<FieldInfo> fieldInfos;
+	const std::vector<MethodInfo> methodInfos;
 
 public:
 
 	template<typename T>
-	ClassInfo(std::initializer_list<const Type*> parentTypes, std::initializer_list<FieldInfo> fieldInfos, std::initializer_list<MethodInfo> methodInfos, T*) :
-		parentTypes(parentTypes),
+	ClassInfo(std::initializer_list<ParentInfo> parentInfos, std::initializer_list<FieldInfo> fieldInfos, std::initializer_list<MethodInfo> methodInfos, T*) :
+		parentInfos(parentInfos),
 		fieldInfos(fieldInfos),
 		methodInfos(methodInfos)
 	{
@@ -55,8 +55,8 @@ struct TemplateClassInfo : public ClassInfo
 public:
 
 	template<template <typename...> typename T, typename ...TArgs>
-	TemplateClassInfo(const char* templateName, std::initializer_list<const Type*> parentTypes, std::initializer_list<FieldInfo> fieldInfos, std::initializer_list<MethodInfo> methodInfos, T<TArgs...>*) :
-		ClassInfo(parentTypes, fieldInfos, methodInfos, (T<TArgs...>*)nullptr),
+	TemplateClassInfo(const char* templateName, std::initializer_list<ParentInfo> parentInfos, std::initializer_list<FieldInfo> fieldInfos, std::initializer_list<MethodInfo> methodInfos, T<TArgs...>*) :
+		ClassInfo(parentInfos, fieldInfos, methodInfos, (T<TArgs...>*)nullptr),
 		templateName(templateName),
 		parameterTypes(sizeof...(TArgs))
 	{
@@ -110,14 +110,14 @@ union TypeInternalInfo
 	TypeInternalInfo() {}
 
 	template<typename T>
-	TypeInternalInfo(std::initializer_list<const Type*> parentTypes, std::initializer_list<FieldInfo> fieldInfos, std::initializer_list<MethodInfo> methodInfos, T*) :
-		classInfo(parentTypes, fieldInfos, methodInfos, (T*)nullptr)
+	TypeInternalInfo(std::initializer_list<ParentInfo> parentInfos, std::initializer_list<FieldInfo> fieldInfos, std::initializer_list<MethodInfo> methodInfos, T*) :
+		classInfo(parentInfos, fieldInfos, methodInfos, (T*)nullptr)
 	{
 	}
 
 	template<typename T>
-	TypeInternalInfo(const char* templateName, std::initializer_list<const Type*> parentTypes, std::initializer_list<FieldInfo> fieldInfos, std::initializer_list<MethodInfo> methodInfos, T*) :
-		templateClassInfo(templateName, parentTypes, fieldInfos, methodInfos, (T*)nullptr)
+	TypeInternalInfo(const char* templateName, std::initializer_list<ParentInfo> parentInfos, std::initializer_list<FieldInfo> fieldInfos, std::initializer_list<MethodInfo> methodInfos, T*) :
+		templateClassInfo(templateName, parentInfos, fieldInfos, methodInfos, (T*)nullptr)
 	{
 	}
 

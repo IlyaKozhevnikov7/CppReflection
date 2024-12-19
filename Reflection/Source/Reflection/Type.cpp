@@ -3,48 +3,6 @@
 
 namespace Reflection
 {
-	size_t Type::GetParentTypeCountInternal(bool all) const
-	{
-		size_t count = m_InternalInfo.classInfo.parentTypes.size();
-
-		if (all == false)
-			return count;
-		
-		for (auto parentType : m_InternalInfo.classInfo.parentTypes)
-			if (parentType != nullptr)
-				count += parentType->GetParentTypeCountInternal(all);
-
-		return count;
-	}
-
-	size_t Type::GetParentTypeCount(bool all) const
-	{
-		if (IsEnum())
-			return 0;
-
-		return GetParentTypeCountInternal(all);
-	}
-
-	void Type::GetParentTypes(const Type** types, bool all) const
-	{
-		if (IsEnum() || types == nullptr)
-			return;
-
-		size_t i = 0;
-
-		for (auto parentType : m_InternalInfo.classInfo.parentTypes)
-		{
-			types[i] = parentType;
-			++i;
-
-			if (parentType != nullptr)
-			{
-				parentType->GetParentTypes(types + i);
-				i += parentType->GetParentTypeCountInternal(false);
-			}
-		}
-	}
-
 	const FieldInfo* Type::GetField(const char* name) const
 	{
 		if (IsEnum())
@@ -54,18 +12,41 @@ namespace Reflection
 			if (strcmp(info.GetName(), name) == 0)
 				return &info;
 
-		for (auto parentType : m_InternalInfo.classInfo.parentTypes)
+		for (auto& parent : m_InternalInfo.classInfo.parentInfos)
 		{
-			if (parentType == nullptr)
+			if (parent.type == nullptr)
 				continue;
-		
-			auto info = parentType->GetField(name);
-		
-			if (info != nullptr)
-				return info;
+			
+			auto field = parent.type->GetField(name);
+			
+			if (field != nullptr)
+				return field;
 		}
 
 		return nullptr;
+	}
+
+	FieldRef Type::GetFieldRef(const char* name) const
+	{
+		if (IsEnum())
+			return {};
+
+		for (auto& info : m_InternalInfo.classInfo.fieldInfos)
+			if (strcmp(info.GetName(), name) == 0)
+				return { &info, 0 };
+
+		for (auto& parent : m_InternalInfo.classInfo.parentInfos)
+		{
+			if (parent.type == nullptr)
+				continue;
+
+			const auto ref = parent.type->GetFieldRef(name);
+
+			if (ref.IsValid())
+				return { ref.GetInfo(), ref.GetOffset() + parent.offset };
+		}
+
+		return {};
 	}
 
 	const MethodInfo* Type::GetMethod(const char* name) const
@@ -77,12 +58,12 @@ namespace Reflection
 			if (strcmp(info.GetName(), name) == 0)
 				return &info;
 
-		for (auto parentType : m_InternalInfo.classInfo.parentTypes)
+		for (auto& parent : m_InternalInfo.classInfo.parentInfos)
 		{
-			if (parentType == nullptr)
+			if (parent.type == nullptr)
 				continue;
 
-			auto info = parentType->GetMethod(name);
+			auto info = parent.type->GetMethod(name);
 
 			if (info != nullptr)
 				return info;
@@ -96,8 +77,8 @@ namespace Reflection
 		if (type == this)
 			return true;
 
-		for (auto parentType : m_InternalInfo.classInfo.parentTypes)
-			if (parentType != nullptr && parentType->IsA(type))
+		for (auto parent : m_InternalInfo.classInfo.parentInfos)
+			if (parent.type != nullptr && parent.type->IsA(type))
 				return true;
 
 		return false;
