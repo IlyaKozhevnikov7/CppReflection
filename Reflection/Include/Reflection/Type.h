@@ -20,8 +20,6 @@ namespace Reflection
 
 	public:
 
-		#include "Internal/TypeMemberIterators.inl"
-
 		struct ParentInfo
 		{
 			const Type*		type;
@@ -51,20 +49,12 @@ namespace Reflection
 			return m_Namespace;
 		}
 
-		size_t GetParentCount() const
-		{
-			if (IsEnum())
-				return 0;
-
-			return m_InternalInfo.classInfo.parentInfos.size();
-		}
-
-		std::span<const ParentInfo> GetParentTypes() const
+		std::span<const ParentInfo> GetParentInfos() const
 		{
 			if (IsEnum())
 				return std::span<const ParentInfo>();
 
-			return std::span<const ParentInfo>(m_InternalInfo.classInfo.parentInfos.data(), m_InternalInfo.classInfo.parentInfos.size());
+			return m_InternalInfo.classInfo.parentInfos;
 		}
 
 		BitMask<TypeFlag> GetFlags() const
@@ -97,6 +87,20 @@ namespace Reflection
 			return IsEnum()
 				? false
 				: m_InternalInfo.classInfo.parentInfos.empty() == false;
+		}
+
+		const std::span<const FieldInfo> GetFields() const
+		{
+			return IsEnum()
+				? std::span<const FieldInfo>()
+				: m_InternalInfo.classInfo.fieldInfos;
+		}
+
+		const std::span<const MethodInfo> GetMethods() const
+		{
+			return IsEnum()
+				? std::span<const MethodInfo>()
+				: m_InternalInfo.classInfo.methodInfos;
 		}
 
 		const Type* GetEnumBaseType() const

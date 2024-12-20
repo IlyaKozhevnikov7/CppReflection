@@ -130,7 +130,7 @@
 				GetName(), \
 
 #define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_END \
-				&Generation::GetActualType<__CURRENT_TYPE__>, \
+				&Reflection::Generation::GetActualType<__CURRENT_TYPE__>, \
 				(__CURRENT_TYPE__*)nullptr); \
 		} \
 		return (Type*)&type; \
@@ -151,7 +151,7 @@
 #define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_NO_FIELD_INFO { },
 
 #define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_FIELDS_BEGIN {
-#define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_FIELD_INFO(Name, Location, Flags) __GEN_TO_STRING(Name), __GEN_FIELD_ADDRESS(Location, Name), Reflection::ParameterFlag(Flags), (decltype(__CURRENT_TYPE__::Name)*)(nullptr) },
+#define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_FIELD_INFO(Name) __GEN_TO_STRING(Name), Reflection::Generation::GetOffsetOfField(&__CURRENT_TYPE__::Name), Reflection::Generation::IsStaticField(&__CURRENT_TYPE__::Name), (decltype(__CURRENT_TYPE__::Name)*)(nullptr) },
 
 #define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_FIELDS_END },
 
@@ -176,13 +176,13 @@
     namespace Reflection { \
     template<typename ...TArgs> struct TypeOf<__GEN_REFLECTION_COMBINE_NAMESPACE(Namespace, T)<TArgs...>> final \
     { \
-        constexpr static uint32_t NameLength = sizeof(__GEN_TO_STRING(T)) + 1 + Generation::FullNameLength<TArgs...>::value + (sizeof...(TArgs) < 2 ? 0 : (sizeof...(TArgs) - 1) * 2); \
+        constexpr static uint32_t NameLength = sizeof(__GEN_TO_STRING(T)) + 1 + Reflection::Generation::FullNameLength<TArgs...>::value + (sizeof...(TArgs) < 2 ? 0 : (sizeof...(TArgs) - 1) * 2); \
     private: \
         using __CURRENT_TYPE__ = __GEN_REFLECTION_COMBINE_NAMESPACE(Namespace, T)<TArgs...>; \
         constexpr static const char* NamespaceName = __GEN_TO_STRING(Namespace); \
-        struct TemplateName final : public Generation::TemplateNameGenerator<NameLength, TArgs...> \
+        struct TemplateName final : public Reflection::Generation::TemplateNameGenerator<NameLength, TArgs...> \
         { \
-            constexpr TemplateName(const char* templateName, int size) : Generation::TemplateNameGenerator<NameLength, TArgs...>(templateName, size) { } \
+            constexpr TemplateName(const char* templateName, int size) : Reflection::Generation::TemplateNameGenerator<NameLength, TArgs...>(templateName, size) { } \
         }; \
     public: \
         static const char* GetName() \
@@ -202,7 +202,7 @@
                     GetName(), \
 
 #define __GEN_REFLECTION_TEMPLATE_TYPE_FORWARD_DECLARATION_END \
-                    &Generation::GetActualType<__CURRENT_TYPE__>, \
+                    &Reflection::Generation::GetActualType<__CURRENT_TYPE__>, \
                     (__CURRENT_TYPE__*)nullptr); \
             } \
             return &type; \

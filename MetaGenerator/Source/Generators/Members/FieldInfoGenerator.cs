@@ -30,9 +30,7 @@ namespace MetaGenerator
                     builder.AppendLine($"\t\t\t__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_NO_ATTRIBUTES");
                 }
 
-                var flags = field.flags;
-                string location = flags.HasFlag(FieldFlag.Static) ? "__GEN_FIELD_GLOBAL" : "__GEN_FIELD_LOCAL";
-                builder.AppendLine($"\t\t\t__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_FIELD_INFO({field.name}, {location}, {(int)flags})");
+                builder.AppendLine($"\t\t\t__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_FIELD_INFO({field.name})");
             }
 
             builder.AppendLine("\t\t__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_FIELDS_END");

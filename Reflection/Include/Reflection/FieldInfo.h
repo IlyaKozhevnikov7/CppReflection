@@ -35,11 +35,11 @@ namespace Reflection
 	public:
 
 		template<typename T>
-		FieldInfo(std::initializer_list<const Attribute*> attributes, const char* name, size_t valueOffset, BitMask<ParameterFlag> flags, T* type) :
+		FieldInfo(std::initializer_list<const Attribute*> attributes, const char* name, size_t valueOffset, bool isStatic, T*) :
 			MemberInfo(attributes, name),
 			m_ParameterType(ParameterType::Initializer<T>{}),
 			m_ValueOffset(valueOffset),
-			m_IsStatic(flags & ParameterFlag::Static) // TODO: remake ctor sign
+			m_IsStatic(isStatic)
 		{
 		}
 	};

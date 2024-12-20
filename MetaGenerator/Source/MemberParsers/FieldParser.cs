@@ -30,17 +30,8 @@ namespace MetaGenerator
             {
                 var fieldDeclaration = match.Groups[2].Value;
 
-                var staticMatch = Regex.Match(fieldDeclaration, @"\bstatic\b");
-
-                if (staticMatch.Success)
-                {
-                    fieldDeclaration = fieldDeclaration.Remove(staticMatch.Index, staticMatch.Length);
-                    infos[i].flags |= FieldFlag.Static;
-                }
-
                 var nameMatch = Regex.Match(fieldDeclaration, @"(\S+)\s*(=[\s\S]+)?;");
                 infos[i].name = nameMatch.Groups[1].Value;
-                infos[i].typeName = FormatString(fieldDeclaration.Substring(0, nameMatch.Index));
                 infos[i].attributeInfos = ParseAttributes(match.Groups["rec"].Value);
 
                 ++i;

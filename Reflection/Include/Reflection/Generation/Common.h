@@ -89,6 +89,30 @@ namespace Reflection::Generation
 		}
 	};
 
+	template <typename T, typename U>
+	bool IsStaticField(U T::*)
+	{
+		return false;
+	}
+
+	template <typename U>
+	bool IsStaticField(U* field)
+	{
+		return true;
+	}
+
+	template <typename T, typename U>
+	size_t GetOffsetOfField(U T::* field)
+	{
+		return reinterpret_cast<size_t>(&(((T*)0)->*field));
+	}
+
+	template <typename U>
+	size_t GetOffsetOfField(U* field)
+	{
+		return reinterpret_cast<size_t>(field);
+	}
+
 	template<typename T>
 	const Type* GetActualType(void* object)
 	{

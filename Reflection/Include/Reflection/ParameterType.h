@@ -8,11 +8,10 @@ namespace Reflection
 
 	enum class ParameterFlag : uint8_t
 	{
-		Static				= BIT<1>, // TODO remove
-		Const				= BIT<2>,
-		Pointer				= BIT<3>,
-		PointerToPointer	= BIT<4>,
-		Reference			= BIT<5>
+		Const				= BIT<1>,
+		Pointer				= BIT<2>,
+		PointerToPointer	= BIT<3>,
+		Reference			= BIT<4>
 	};
 
 	class ParameterType
