@@ -23,8 +23,6 @@ namespace MetaGenerator
 
         protected static AttributeInfo[] ParseAttributes(string attributeDefinitions)
         {
-            attributeDefinitions = attributeDefinitions.Replace(" ", string.Empty);
-
             if (attributeDefinitions.Length == 2)
                 return null;
 

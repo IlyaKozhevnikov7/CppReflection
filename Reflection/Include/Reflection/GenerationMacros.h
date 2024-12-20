@@ -34,12 +34,7 @@
 #define __GEN_TO_STRING_INTERNAL(S) #S
 #define __GEN_TO_STRING(String) __GEN_TO_STRING_INTERNAL(String)
 #define __GEN_COMBINE_STRING(S1, S2) __GEN_TO_STRING(S1 ## S2)
-
-#define __GEN_FIELD_INFO(Name, Location, ...) { __GEN_TO_STRING(Name), TypeOf<std::absolute_t<__VA_ARGS__>>::GetType(), __GEN_FIELD_ADDRESS(Location, Name),  },	// TODO: remove
-
-#define __GEN_FIELD_ADDRESS(Mathod, Name) Mathod(Name)
-#define __GEN_FIELD_LOCAL(Name) offsetof(__CURRENT_TYPE__, Name)
-#define __GEN_FIELD_GLOBAL(Name) reinterpret_cast<size_t>(&__CURRENT_TYPE__::Name)
+#define __GEN_ARG(...) __VA_ARGS__
 
 #define __GEN_REFLECTION_NO_NAMESPACE_WRAPPER(typeOf, T, ...) typeOf T
 #define __GEN_REFLECTION_NAMESPACE_WRAPPER(typeOf, T, Namespace) namespace Namespace { typeOf T; }
@@ -168,8 +163,6 @@
 /*
 *  ========== Template generation ==========
 */
-
-#define __GEN_ARGS(...) __VA_ARGS__
 
 #define __GEN_REFLECTION_TEMPLATE_TYPE_FORWARD_DECLARATION_BEGIN(typeOf, T, Wrapper, Namespace) \
 	Wrapper(typeOf, T, Namespace); \

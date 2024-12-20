@@ -32,14 +32,20 @@ namespace Reflection
 			return m_Attributes;
 		}
 
-		template<typename TAttribute>
-		bool HasAttribute() const
+		template<typename T>
+		const T* GetAttribute() const
 		{
 			for (auto attribute : m_Attributes)
-				if (attribute->GetType() == TypeOf<TAttribute>::Get())
-					return true;
-			
-			return false;
+				if (attribute->GetType() == TypeOf<T>::Get())
+					return (T*)attribute;
+
+			return nullptr;
+		}
+
+		template<typename T>
+		bool HasAttribute() const
+		{
+			return GetAttribute<T>() != nullptr;
 		}
 	};
 }

@@ -16,20 +16,7 @@ namespace MetaGenerator
 
             foreach (var field in Context.fields)
             {
-                if (field.HasAttributes)
-                {
-                    builder.AppendLine($"\t\t\t__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_FIELD_INFO_ATTRIBUTE_BEGIN");
-
-                    foreach (var info in field.attributeInfos)
-                        builder.AppendLine($"\t\t\t\t__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_FIELD_INFO_ATTRIBUTE(__GEN_TO_VALUE({info.name}), {info.args})");
-
-                    builder.AppendLine($"\t\t\t__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_FIELD_INFO_ATTRIBUTE_END");
-                }
-                else
-                {
-                    builder.AppendLine($"\t\t\t__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_NO_ATTRIBUTES");
-                }
-
+                Generator.Launch<AttributeGenerator, MemberInfo>(builder, field);
                 builder.AppendLine($"\t\t\t__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_FIELD_INFO({field.name})");
             }
 
