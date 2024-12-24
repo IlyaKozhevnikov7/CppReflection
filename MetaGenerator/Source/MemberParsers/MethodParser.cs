@@ -1,6 +1,7 @@
 ﻿using PCRE;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace MetaGenerator
 {
@@ -48,13 +49,14 @@ namespace MetaGenerator
 
             return MethodVirtualType.NotVirtual;
         }
+
         private static MethodInfo.DeclarationInfo ParseDeclarationInfo(PcreMatch match)
         {
             return new()
             {
                 parameters = match.Groups["args"].Value.Trim(),
                 prefix = match.Groups[2].Value.Trim(),
-                suffix = match.Groups[5].Value.Trim()
+                suffix = Regex.Replace(match.Groups[5].Value.Trim(), @"\boverride\b", string.Empty)
             };
         }
     }

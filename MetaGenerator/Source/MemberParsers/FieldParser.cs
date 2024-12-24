@@ -13,7 +13,7 @@ namespace MetaGenerator
 
         public FieldInfo[] Parse()
         {
-            IEnumerable<PcreMatch> matches = FindMatches(@"FIELD(?<rec>\((?:[^()]|(?&rec))*\))([\s\S]*?;)", Text);
+            IEnumerable<PcreMatch> matches = FindMatches(@"FIELD(?<attr>\((?:[^()]|(?&attr))*\))([\s\S]*?;)", Text);
 
             if (matches.Count() == 0)
                 return null;
@@ -30,9 +30,9 @@ namespace MetaGenerator
             {
                 var fieldDeclaration = match.Groups[2].Value;
 
-                var nameMatch = Regex.Match(fieldDeclaration, @"(\S+)\s*(=[\s\S]+)?;");
+                var nameMatch = Regex.Match(fieldDeclaration, @"([^\s\{]+)\s*([=\{][\s\S]+)?\s*;$");
                 infos[i].name = nameMatch.Groups[1].Value;
-                infos[i].attributeInfos = ParseAttributes(match.Groups["rec"].Value);
+                infos[i].attributeInfos = ParseAttributes(match.Groups["attr"].Value);
 
                 ++i;
             }

@@ -228,26 +228,17 @@
 	} \
 
 /*
-*	========== Assembly generation ==========
-*/
-
-#define __GEN_REFLECTION_ASSEMBLY_FUNCTION_INFO_BEGIN {
-#define __GEN_REFLECTION_ASSEMBLY_FUNCTION_INFO(Name, ...) __GEN_TO_STRING(Name), Name, __VA_ARGS__ },
-#define __GEN_REFLECTION_ASSEMBLY_FUNCTION_INFO_END }
-#define __GEN_REFLECTION_ASSEMBLY_NO_FUNCTION_INFO {}
-
-/*
 *	========== Inline generation ==========
 */
 
 #define __GEN_VIRTUAL_MODIFICATION virtual
 #define __GEN_EMPTY_MODIFICATION
 
-#define __GEN_REFLECTION_TYPE_INLINE_CORE(GetTypeVirtualModificator) \
+#define __GEN_REFLECTION_TYPE_INLINE_CORE(VirtualModificator) \
 	private: \
 		friend Reflection::TypeOf<__THIS_TYPE__>; \
 	public: \
-		GetTypeVirtualModificator const Reflection::Type* GetType() const \
+		VirtualModificator const Reflection::Type* GetType() const \
 		{ \
 			return Reflection::TypeOf<__THIS_TYPE__>::Get(); \
 		} \

@@ -35,7 +35,7 @@ namespace MetaGenerator
                 ParseClassHeader(header, ref classInfos[i]);
                 classInfos[i].namespaceName = HeaderParser.GetNamespaceByPosition(match.Index);
                 classInfos[i].fields = ParseFieldInfos(bodyGroup.Value);
-                classInfos[i].methods = ParseMethodInfos(bodyGroup.Value, classInfos[i].name);
+                classInfos[i].methods = ParseMethodInfos(bodyGroup.Value);
 
                 var templMatch = match["templ"];
                 classInfos[i].templateParameters = templMatch.Success ? templMatch.Value : null;
@@ -100,13 +100,6 @@ namespace MetaGenerator
         }
 
         private FieldInfo[] ParseFieldInfos(string body) => new FieldParser(body).Parse();
-        private MethodInfo[] ParseMethodInfos(string body, string className)
-        {
-            var methodInfos = new MethodParser(body).Parse();
-
-            return methodInfos != null
-                ? methodInfos.ToArray()
-                : null;
-        }
+        private MethodInfo[] ParseMethodInfos(string body) => new MethodParser(body).Parse();
     }
 }
