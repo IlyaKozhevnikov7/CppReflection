@@ -13,7 +13,7 @@
 		{ \
 			constexpr static uint32_t NameLength = sizeof(Name) - 1; \
 			static const char* GetName(); \
-			static const Type* Get(); \
+			static TypePtr Get(); \
 		}; \
 	} \
 
@@ -21,7 +21,7 @@
 	namespace Reflection \
 	{ \
 		const char* TypeOf<T>::GetName() { return __GEN_TO_STRING(Name); } \
-		const Type* TypeOf<T>::Get() \
+		TypePtr TypeOf<T>::Get() \
 		{ \
 			static Type type(nullptr, GetName(), {}, {}, {}, nullptr, (T*)nullptr); \
 			return &type; \
@@ -51,7 +51,7 @@
 		{ \
 			constexpr static uint32_t NameLength = sizeof(__GEN_TO_STRING(Name)) - 1; \
 			static const char* GetName(); \
-			static const Type* Get(); \
+			static TypePtr Get(); \
 		}; \
 	} \
 
@@ -114,7 +114,7 @@
 *  ---------- Class/Struct ----------
 */
 #define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_BEGIN(Namespace) \
-	const Type* TypeOf<__CURRENT_TYPE__>::Get() \
+	TypePtr TypeOf<__CURRENT_TYPE__>::Get() \
 	{ \
 		static Type type; \
 		static bool initialized = false; \
@@ -128,7 +128,7 @@
 				&Reflection::Generation::GetActualType<__CURRENT_TYPE__>, \
 				(__CURRENT_TYPE__*)nullptr); \
 		} \
-		return (Type*)&type; \
+		return &type; \
 	} \
 	
 /*
@@ -137,7 +137,7 @@
 #define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_NO_PARENT_INFO { },
 
 #define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_PARENT_INFO_BEGIN {
-#define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_PARENT_INFO(...) { TypeOf<__VA_ARGS__>::Get(), (const size_t)((uint8_t*)(__VA_ARGS__*)(__CURRENT_TYPE__*)(sizeof(__CURRENT_TYPE__)) - (uint8_t*)(__CURRENT_TYPE__*)sizeof(__CURRENT_TYPE__)) },
+#define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_PARENT_INFO(Id) { TypeOf<__CURRENT_TYPE__::__GEN_REFLECTION_TYPE_META::TParent##Id>::Get(), (const size_t)((uint8_t*)(typename __CURRENT_TYPE__::__GEN_REFLECTION_TYPE_META::TParent##Id*)(__CURRENT_TYPE__*)(sizeof(__CURRENT_TYPE__)) - (uint8_t*)(__CURRENT_TYPE__*)sizeof(__CURRENT_TYPE__)) },
 #define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_PARENT_INFO_END },
 
 /*
@@ -156,7 +156,7 @@
 #define	__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_NO_METHOD_INFO { },
 
 #define	__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_METHOD_INFO_BEGIN {
-#define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_METHOD_INFO(Name, MethodSignatureId, Flags) __GEN_TO_STRING(Name), &__CURRENT_TYPE__::Name, {}, (const __CURRENT_TYPE__*)nullptr, decltype(&__CURRENT_TYPE__::__GEN_REFLECTION_METHOD_SIGNATURES::_##MethodSignatureId)(nullptr), Reflection::MethodFlags(Flags) },
+#define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_METHOD_INFO(Name, Id, Flags) __GEN_TO_STRING(Name), &__CURRENT_TYPE__::Name, {}, (const __CURRENT_TYPE__*)nullptr, decltype(&__CURRENT_TYPE__::__GEN_REFLECTION_TYPE_META::_##Id)(nullptr), Reflection::MethodFlags(Flags) },
 
 #define	__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_METHOD_INFOS_END },
 
@@ -173,24 +173,24 @@
     private: \
         using __CURRENT_TYPE__ = __GEN_REFLECTION_COMBINE_NAMESPACE(Namespace, T)<TArgs...>; \
         constexpr static const char* NamespaceName = __GEN_TO_STRING(Namespace); \
-        struct TemplateName final : public Reflection::Generation::TemplateNameGenerator<NameLength, TArgs...> \
+        struct Name final : public Reflection::Generation::GenericTypeName<NameLength, TArgs...> \
         { \
-            constexpr TemplateName(const char* templateName, int size) : Reflection::Generation::TemplateNameGenerator<NameLength, TArgs...>(templateName, size) { } \
+            constexpr Name(const char* templateName, int size) : Reflection::Generation::GenericTypeName<NameLength, TArgs...>(templateName, size) { } \
         }; \
     public: \
         static const char* GetName() \
         { \
-            static TemplateName name(__GEN_TO_STRING(T), sizeof(__GEN_TO_STRING(T)) - 1); \
+            static Name name(Generation::__GEN_COMBINE_NAMES(GetTemplateMemberName_, __GEN_REFLECTION_TEMPLATE_MEMBER_0)##_0(), sizeof(__GEN_TO_STRING(T)) - 1); \
             return name; \
         } \
-        static const Type* Get() \
+        static TypePtr Get() \
         { \
             static Type type; \
             static bool initialized = false; \
             if (initialized == false) \
             { \
                 initialized = true; \
-                new(&type) Type(__GEN_TO_STRING(T), \
+                new(&type) Type(Generation::__GEN_COMBINE_NAMES(GetTemplateMemberName_, __GEN_REFLECTION_TEMPLATE_MEMBER_0)##_0(), \
                     NamespaceName, \
                     GetName(), \
 
@@ -203,6 +203,10 @@
     }; \
 }; \
 
+#define __GEN_REFLECTION_TEMPLATE_MEMBER_NAME_FUNCTION(ExportMacro, MemberId) ExportMacro const char* __GEN_COMBINE_NAMES(GetTemplateMemberName_, __GEN_REFLECTION_TEMPLATE_MEMBER_0)##_##MemberId();
+
+#define __GEN_REFLECTION_TEMPLATE_GET_TYPE_IMPLEMENTATION_FIELD_INFO(MemberId) Generation::__GEN_COMBINE_NAMES(GetTemplateMemberName_, __GEN_REFLECTION_TEMPLATE_MEMBER_0)##_##MemberId(), Reflection::Generation::GetOffsetOfField(&__CURRENT_TYPE__::__GEN_REFLECTION_TEMPLATE_MEMBER_##MemberId), Reflection::Generation::IsStaticField(&__CURRENT_TYPE__::__GEN_REFLECTION_TEMPLATE_MEMBER_##MemberId), (decltype(__CURRENT_TYPE__::__GEN_REFLECTION_TEMPLATE_MEMBER_##MemberId)*)(nullptr) },
+#define __GEN_REFLECTION_TEMPLATE_GET_TYPE_IMPLEMENTATION_METHOD_INFO(MemberId, Id, Flags) Generation::__GEN_COMBINE_NAMES(GetTemplateMemberName_, __GEN_REFLECTION_TEMPLATE_MEMBER_0)##_##MemberId(), &__CURRENT_TYPE__::__GEN_REFLECTION_TEMPLATE_MEMBER_##MemberId, {}, (const __CURRENT_TYPE__*)nullptr, decltype(&__CURRENT_TYPE__::__GEN_REFLECTION_TYPE_META::_##Id)(nullptr), Reflection::MethodFlags(Flags) },
 
 /*
 *  ========== Enum generation ==========
@@ -218,7 +222,7 @@
 	} \
 
 #define	__GEN_REFLECTION_GET_ENUM_TYPE_IMPLEMENTATION(Namespace) \
-	const Type* TypeOf<__CURRENT_TYPE__>::Get() \
+	TypePtr TypeOf<__CURRENT_TYPE__>::Get() \
 	{ \
 		static Type type( \
 			Namespace, \
@@ -238,16 +242,16 @@
 	private: \
 		friend Reflection::TypeOf<__THIS_TYPE__>; \
 	public: \
-		VirtualModificator const Reflection::Type* GetType() const \
+		VirtualModificator Reflection::TypePtr GetType() const \
 		{ \
 			return Reflection::TypeOf<__THIS_TYPE__>::Get(); \
 		} \
 
-#define __GEN_REFLECTION_TYPE_INLINE_METHOD_SIGNATURES_BEGIN \
+#define __GEN_REFLECTION_TYPE_INLINE_META_BEGIN \
 	private: \
-		struct __GEN_REFLECTION_METHOD_SIGNATURES final \
+		struct __GEN_REFLECTION_TYPE_META final \
 		{ \
 			friend Reflection::TypeOf<__THIS_TYPE__>; \
 
 
-#define __GEN_REFLECTION_TYPE_INLINE_METHOD_SIGNATURES_END };
+#define __GEN_REFLECTION_TYPE_INLINE_META_END };

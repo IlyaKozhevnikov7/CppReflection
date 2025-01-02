@@ -1,18 +1,18 @@
-#include "Reflection/Assembly.h"
-#include "Reflection/Type.h"
+#include "Assembly.h"
+#include "Type.h"
 
 namespace Reflection
 {
-	Assembly::Assembly(const char* name, std::initializer_list<const Type*> types) :
+	Assembly::Assembly(const char* name, std::initializer_list<TypePtr> types) :
 		m_Name(name),
 		m_Handle(Platform::GetThisModule(this)),
 		m_Types(types)
-	{	
+	{		
 		for (auto type : m_Types)
-			const_cast<Type*>(type)->m_Assembly = this;
+			const_cast<Type*>((const Type*)type)->m_Assembly = this;
 	}
 
-	const Type* Assembly::GetType(const char* name, const char* namespaceName) const
+	TypePtr Assembly::GetType(const char* name, const char* namespaceName) const
 	{
 		if (name == nullptr)
 			return nullptr;

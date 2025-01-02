@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CppReflectionCore.h"
+#include "Reflection/TypePtr.h"
 #include "Reflection/Utils/BitMask.h"
 #include "Reflection/GenerationMacros.h"
 #include "Reflection/EnumValue.h"
@@ -19,7 +19,7 @@ namespace Reflection
 			return nullptr;
 		}
 
-		constexpr static const Type* Get()
+		constexpr static TypePtr Get()
 		{
 			return nullptr;
 		}

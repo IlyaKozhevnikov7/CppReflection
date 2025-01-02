@@ -12,21 +12,22 @@ namespace Reflection
 		Abstract		= BIT<2>,
 		TemplateType	= BIT<3>,
 		Enum			= BIT<4>
-	};
+	};	
 
 	class REFLECTION_API Type : public MemberInfo
 	{
 		friend class Assembly;
+		friend class TypePtr;
 
 	public:
 
 		struct ParentInfo
 		{
-			const Type*		type;
+			const TypePtr	type;
 			const size_t	offset;
 		};
 
-		using GetActualTypeSignature = const Type*(*)(void*);
+		using GetActualTypeSignature = TypePtr(*)(void*);
 		using CreateInstanceSignature = void*(*)();
 
 	private:
@@ -38,7 +39,7 @@ namespace Reflection
 		GetActualTypeSignature	m_GetActualType;
 
 	public:
-	
+
 		size_t GetSize() const
 		{
 			return m_Size;
@@ -103,7 +104,7 @@ namespace Reflection
 				: m_InternalInfo.classInfo.methodInfos;
 		}
 
-		const Type* GetEnumBaseType() const
+		TypePtr GetEnumBaseType() const
 		{
 			return IsEnum()
 				? m_InternalInfo.enumInfo.base
@@ -135,7 +136,7 @@ namespace Reflection
 		/*
 		*	NOTE: Make sure that ptr is really point at this type object
 		*/
-		const Type* GetActualType(void* ptr) const
+		TypePtr GetActualType(void* ptr) const
 		{
 			return m_GetActualType(ptr);
 		}

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CppReflectionCore.h"
+#include "Reflection/TypePtr.h"
 #include "Generation/ReflectionReflectionInclude.meta.h"
 
 namespace Reflection

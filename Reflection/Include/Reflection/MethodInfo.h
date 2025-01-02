@@ -16,12 +16,12 @@ namespace Reflection
 	{
 	private:
 
-		const Type*					m_ObjectType;
+		const TypePtr				m_ObjectType;
 		const BitMask<MethodFlags>	m_Flags;
 
 	public:
 
-		const Type* GetObjectType() const
+		TypePtr GetObjectType() const
 		{
 			return m_ObjectType;
 		}

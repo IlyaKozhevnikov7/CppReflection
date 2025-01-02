@@ -4,8 +4,6 @@
 
 namespace Reflection
 {
-	class Type;
-
 	enum class ParameterFlag : uint8_t
 	{
 		Const				= BIT<1>,
@@ -18,12 +16,12 @@ namespace Reflection
 	{
 	private:
 	
-		const Type*						m_Type;
+		const TypePtr					m_Type;
 		const BitMask<ParameterFlag>	m_Flags;
 	
 	public:
 	
-		const Type* GetType() const
+		TypePtr GetType() const
 		{
 			return m_Type;
 		}
@@ -108,7 +106,7 @@ namespace Reflection
 		{
 			constexpr static BitMask<ParameterFlag> Flags = ExcludeFlags<T>::Flags;
 	
-			constexpr static const Type* GetType()
+			constexpr static TypePtr GetType()
 			{
 				return TypeOf<AbsoluteType<T>>::Get();
 			}

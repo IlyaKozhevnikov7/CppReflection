@@ -49,15 +49,15 @@ public:
 
 struct TemplateClassInfo : public ClassInfo
 {
-	const char* templateName;
+	const char* name;
 	std::vector<ParameterType>	parameterTypes;
 
 public:
 
 	template<template <typename...> typename T, typename ...TArgs>
-	TemplateClassInfo(const char* templateName, std::initializer_list<ParentInfo> parentInfos, std::initializer_list<FieldInfo> fieldInfos, std::initializer_list<MethodInfo> methodInfos, T<TArgs...>*) :
+	TemplateClassInfo(const char* name, std::initializer_list<ParentInfo> parentInfos, std::initializer_list<FieldInfo> fieldInfos, std::initializer_list<MethodInfo> methodInfos, T<TArgs...>*) :
 		ClassInfo(parentInfos, fieldInfos, methodInfos, (T<TArgs...>*)nullptr),
-		templateName(templateName),
+		name(name),
 		parameterTypes(sizeof...(TArgs))
 	{
 		if constexpr (sizeof...(TArgs) > 0)
@@ -81,7 +81,7 @@ private:
 
 struct EnumInfo
 {
-	const Type* base;
+	TypePtr base;
 	std::span<const EnumValue>	values;
 
 public:
@@ -116,8 +116,8 @@ union TypeInternalInfo
 	}
 
 	template<typename T>
-	TypeInternalInfo(const char* templateName, std::initializer_list<ParentInfo> parentInfos, std::initializer_list<FieldInfo> fieldInfos, std::initializer_list<MethodInfo> methodInfos, T*) :
-		templateClassInfo(templateName, parentInfos, fieldInfos, methodInfos, (T*)nullptr)
+	TypeInternalInfo(const char* name, std::initializer_list<ParentInfo> parentInfos, std::initializer_list<FieldInfo> fieldInfos, std::initializer_list<MethodInfo> methodInfos, T*) :
+		templateClassInfo(name, parentInfos, fieldInfos, methodInfos, (T*)nullptr)
 	{
 	}
 
