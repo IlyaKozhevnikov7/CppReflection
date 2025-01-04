@@ -40,7 +40,7 @@
 #define __GEN_REFLECTION_NAMESPACE_WRAPPER(typeOf, T, Namespace) namespace Namespace { typeOf T; }
 #define __GEN_REFLECTION_NAMESPACE_ENUM_WRAPPER(ForwardDecl, Namespace) namespace Namespace { ForwardDecl; }
 
-#define __GEN_REFLECTION_COMBINE_NAMESPACE(a, b) a ## :: ## b
+#define __GEN_COMBINE_NAMESPACE(a, b) a ## :: ## b
 
 #define __GEN_REFLECTION_TYPE_OF_FORWARD_DECLARATION(ExportMacro, Name, FullName) \
 	namespace Reflection \
@@ -57,7 +57,7 @@
 
 #define __GEN_REFLECTION_TYPE_FORWARD_DECLARATION(ExportMacro, typeOf, T, Wrapper, Namespace) \
 	Wrapper(typeOf, T, Namespace); \
-	__GEN_REFLECTION_TYPE_OF_FORWARD_DECLARATION(ExportMacro, T, __GEN_REFLECTION_COMBINE_NAMESPACE(Namespace, T)) \
+	__GEN_REFLECTION_TYPE_OF_FORWARD_DECLARATION(ExportMacro, T, __GEN_COMBINE_NAMESPACE(Namespace, T)) \
 
 
 #define __GEN_REFLECTION_GET_NAME_IMPLEMENTATION(Name) \
@@ -68,11 +68,11 @@
 
 #define __GEN_REFLECTION_ENUM_TYPE_FORWARD_DECLARATION(ExportMacro, T, Wrapper, ForwardDecl, Namespace) \
 	Wrapper(ForwardDecl, Namespace); \
-	__GEN_REFLECTION_TYPE_OF_FORWARD_DECLARATION(ExportMacro, T, __GEN_REFLECTION_COMBINE_NAMESPACE(Namespace, T)) \
+	__GEN_REFLECTION_TYPE_OF_FORWARD_DECLARATION(ExportMacro, T, __GEN_COMBINE_NAMESPACE(Namespace, T)) \
 	namespace Reflection \
 	{ \
 		template<> \
-		struct ExportMacro EnumValues<__GEN_REFLECTION_COMBINE_NAMESPACE(Namespace, T)> final \
+		struct ExportMacro EnumValues<__GEN_COMBINE_NAMESPACE(Namespace, T)> final \
 		{ \
 			static const std::span<const EnumValue> Get(); \
 		}; \
@@ -164,15 +164,18 @@
 *  ========== Template generation ==========
 */
 
-#define __GEN_REFLECTION_TEMPLATE_TYPE_FORWARD_DECLARATION_BEGIN(typeOf, T, Wrapper, Namespace) \
+#define __GEN_REFLECTION_NAMESPACE_CONVERTER(...) __GEN_TO_STRING(__VA_ARGS__)
+#define __GEN_REFLECTION_NULL_NAMESPACE_CONVERTER(...) nullptr
+
+#define __GEN_REFLECTION_TEMPLATE_TYPE_FORWARD_DECLARATION_BEGIN(typeOf, T, Wrapper, Converter, Namespace) \
 	Wrapper(typeOf, T, Namespace); \
     namespace Reflection { \
-    template<typename ...TArgs> struct TypeOf<__GEN_REFLECTION_COMBINE_NAMESPACE(Namespace, T)<TArgs...>> final \
+    template<typename ...TArgs> struct TypeOf<__GEN_COMBINE_NAMESPACE(Namespace, T)<TArgs...>> final \
     { \
         constexpr static uint32_t NameLength = sizeof(__GEN_TO_STRING(T)) + 1 + Reflection::Generation::FullNameLength<TArgs...>::value + (sizeof...(TArgs) < 2 ? 0 : (sizeof...(TArgs) - 1) * 2); \
     private: \
-        using __CURRENT_TYPE__ = __GEN_REFLECTION_COMBINE_NAMESPACE(Namespace, T)<TArgs...>; \
-        constexpr static const char* NamespaceName = __GEN_TO_STRING(Namespace); \
+        using __CURRENT_TYPE__ = __GEN_COMBINE_NAMESPACE(Namespace, T)<TArgs...>; \
+        constexpr static const char* NamespaceName = Converter(Namespace); \
         struct Name final : public Reflection::Generation::GenericTypeName<NameLength, TArgs...> \
         { \
             constexpr Name(const char* templateName, int size) : Reflection::Generation::GenericTypeName<NameLength, TArgs...>(templateName, size) { } \
@@ -203,7 +206,7 @@
     }; \
 }; \
 
-#define __GEN_REFLECTION_TEMPLATE_MEMBER_NAME_FUNCTION(ExportMacro, MemberId) ExportMacro const char* __GEN_COMBINE_NAMES(GetTemplateMemberName_, __GEN_REFLECTION_TEMPLATE_MEMBER_0)##_##MemberId();
+#define __GEN_REFLECTION_TEMPLATE_MEMBER_NAME_FUNCTION(ExportMacro, MemberId) ExportMacro extern const char* __GEN_COMBINE_NAMES(GetTemplateMemberName_, __GEN_REFLECTION_TEMPLATE_MEMBER_0)##_##MemberId();
 
 #define __GEN_REFLECTION_TEMPLATE_GET_TYPE_IMPLEMENTATION_FIELD_INFO(MemberId) Generation::__GEN_COMBINE_NAMES(GetTemplateMemberName_, __GEN_REFLECTION_TEMPLATE_MEMBER_0)##_##MemberId(), Reflection::Generation::GetOffsetOfField(&__CURRENT_TYPE__::__GEN_REFLECTION_TEMPLATE_MEMBER_##MemberId), Reflection::Generation::IsStaticField(&__CURRENT_TYPE__::__GEN_REFLECTION_TEMPLATE_MEMBER_##MemberId), (decltype(__CURRENT_TYPE__::__GEN_REFLECTION_TEMPLATE_MEMBER_##MemberId)*)(nullptr) },
 #define __GEN_REFLECTION_TEMPLATE_GET_TYPE_IMPLEMENTATION_METHOD_INFO(MemberId, Id, Flags) Generation::__GEN_COMBINE_NAMES(GetTemplateMemberName_, __GEN_REFLECTION_TEMPLATE_MEMBER_0)##_##MemberId(), &__CURRENT_TYPE__::__GEN_REFLECTION_TEMPLATE_MEMBER_##MemberId, {}, (const __CURRENT_TYPE__*)nullptr, decltype(&__CURRENT_TYPE__::__GEN_REFLECTION_TYPE_META::_##Id)(nullptr), Reflection::MethodFlags(Flags) },

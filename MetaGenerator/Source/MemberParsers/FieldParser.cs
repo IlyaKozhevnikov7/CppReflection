@@ -14,10 +14,6 @@ namespace MetaGenerator
         public FieldInfo[] Parse()
         {
             IEnumerable<PcreMatch> matches = FindMatches(@"FIELD(?<attr>\((?:[^()]|(?&attr))*\))([\s\S]*?;)", Text);
-
-            if (matches.Count() == 0)
-                return null;
-
             return ParseInfos(matches);
         }
 

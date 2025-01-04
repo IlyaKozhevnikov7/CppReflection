@@ -1,28 +1,51 @@
-﻿using System.Text;
-
+﻿
 namespace MetaGenerator
 {
-    internal class MethodInfoGenerator : Generator<ClassInfo>
+    public abstract class MethodInfoGeneratorBase : SecondaryGenerator<ClassInfo>
     {
-        public override void Generate(StringBuilder builder)
+        public override void Run()
         {
             if (Context.HasMethods == false)
             {
-                builder.AppendLine("\t\t__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_NO_METHOD_INFO");
+                Builder.AppendLine("\t\t__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_NO_METHOD_INFO");
                 return;
             }
 
-            builder.AppendLine("\t\t__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_METHOD_INFO_BEGIN");
+            Builder.AppendLine("\t\t__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_METHOD_INFO_BEGIN");
+            GenerateMethods();
+            Builder.AppendLine("\t\t__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_METHOD_INFOS_END");
+        }
+
+        protected abstract void GenerateMethods();
+    }
+
+    public class MethodInfoGenerator : MethodInfoGeneratorBase
+    {
+        protected override void GenerateMethods()
+        {
+            for (int i = 0; i < Context.methods.Length; i++)
+            {
+                var info = Context.methods[i];
+
+                Launch<AttributeGenerator, MemberInfo>(Builder, info);
+                Builder.AppendLine($"\t\t\t__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_METHOD_INFO({info.name}, {i}, {(int)info.virtualType})");
+            }
+        }
+    }
+
+    public class TemplateMethodInfoGenerator : MethodInfoGeneratorBase
+    {
+        protected override void GenerateMethods()
+        {
+            int memberIdOffset = Context.fields.Length + 1;
 
             for (int i = 0; i < Context.methods.Length; i++)
             {
                 var info = Context.methods[i];
 
-                Generator.Launch<AttributeGenerator, MemberInfo>(builder, info);
-                builder.AppendLine($"\t\t\t__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_METHOD_INFO({info.name}, {i}, {(int)info.virtualType})");
+                Launch<AttributeGenerator, MemberInfo>(Builder, info);
+                Builder.AppendLine($"\t\t\t__GEN_REFLECTION_TEMPLATE_GET_TYPE_IMPLEMENTATION_METHOD_INFO({i + memberIdOffset}, {i}, {(int)info.virtualType})");
             }
-
-            builder.AppendLine("\t\t__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_METHOD_INFOS_END");
         }
     }
 }

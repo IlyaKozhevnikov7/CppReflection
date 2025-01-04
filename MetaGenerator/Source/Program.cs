@@ -21,12 +21,10 @@ foreach (var header in ProgramContext.Headers)
     if (fileInfo.HasValue == false)
         continue;
 
-    CodeGenerator codeGenerator = new(fileInfo.Value);
-    codeGenerator.GenerateForFile();
+    PerFileGenerator.Run(fileInfo.Value);
 }
 
-CodeGenerator.GenerateProjectCommonInclude();
-CodeGenerator.GenerateProjectAssemblyFile();
+ProjectFilesGenerator.Run();
 
 sw.Stop();
 Console.WriteLine($"MetaGenerator running done... (${sw.ElapsedMilliseconds} ms)");

@@ -11,14 +11,9 @@ namespace MetaGenerator
         {
         }
 
-
         public EnumInfo[] Parse()
         {
             IEnumerable<PcreMatch> matches = FindMatches(@"REFLECTABLE(?<rec>\((?:[^()]|(?&rec))*\))(\s*enum\s+(class\s+)?(\S+)[\s\S]+?){([\s\S]*?)};", HeaderParser.Text);
-
-            if (matches.Count() == 0)
-                return null;
-
             return ParseInfos(matches);
         }
 

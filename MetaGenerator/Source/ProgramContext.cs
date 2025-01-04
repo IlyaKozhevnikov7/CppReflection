@@ -34,6 +34,7 @@ namespace MetaGenerator
         public static string GenerationDirectory { get; private set; }
         public static string ProjectName => Path.GetFileName(Path.GetDirectoryName(ProjectPath));
         public static string DllExportMacro { get; private set; }
+        public static string InternalDllExportMacro { get; private set; }
         public static bool HasDllExportMacro => DllExportMacro != NO_DLL_EXPORT_MACRO;
 
         public static readonly string[] CppFileExtensions = [".h", ".hpp"];
@@ -51,6 +52,10 @@ namespace MetaGenerator
 
             ParseOptions(args);
             CreateWorkDirectory();
+
+            InternalDllExportMacro = HasDllExportMacro == false
+                ? DllExportMacro
+                : $"__REFLECTION_{DllExportMacro}_API__";
         }
 
         public static IEnumerable<HeaderInfo> Headers

@@ -9,7 +9,7 @@ namespace Reflection
 		m_Types(types)
 	{		
 		for (auto type : m_Types)
-			const_cast<Type*>((const Type*)type)->m_Assembly = this;
+			const_cast<Type*>(type.m_Type)->m_Assembly = this;
 	}
 
 	TypePtr Assembly::GetType(const char* name, const char* namespaceName) const

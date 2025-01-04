@@ -1,6 +1,5 @@
 ﻿using PCRE;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace MetaGenerator
 {
@@ -37,10 +36,6 @@ namespace MetaGenerator
         private void Parse(string text, int outerNamespaceOffset = 0)
         {
             IEnumerable<PcreMatch> matches = FindMatches(@"namespace\s+(\w+)\s*(?<body>\{(?:[^{}]|(?&body))*\})", text);
-
-            if (matches.Count() == 0)
-                return;
-
             ParseInfos(matches, outerNamespaceOffset);
         }
 

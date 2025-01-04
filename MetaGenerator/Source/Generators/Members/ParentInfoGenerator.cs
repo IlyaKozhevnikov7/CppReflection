@@ -1,23 +1,22 @@
-﻿using System.Text;
-
+﻿
 namespace MetaGenerator
 {
-    internal class ParentInfoGenerator : Generator<ClassInfo>
+    internal class ParentInfoGenerator : SecondaryGenerator<ClassInfo>
     {
-        public override void Generate(StringBuilder builder)
+        public override void Run()
         {
             if (Context.HasParents == false)
             {
-                builder.AppendLine("\t\t__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_NO_PARENT_INFO");
+                Builder.AppendLine("\t\t__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_NO_PARENT_INFO");
                 return;
             }
 
-            builder.AppendLine("\t\t__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_PARENT_INFO_BEGIN");
+            Builder.AppendLine("\t\t__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_PARENT_INFO_BEGIN");
 
-            foreach (var parentName in Context.parentNames)
-                builder.AppendLine($"\t\t\t__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_PARENT_INFO({parentName})");
+            for (int i = 0; i < Context.parentNames.Length; i++)
+                Builder.AppendLine($"\t\t\t__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_PARENT_INFO({i})");
 
-            builder.AppendLine("\t\t__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_PARENT_INFO_END");
+            Builder.AppendLine("\t\t__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_PARENT_INFO_END");
         }
     }
 }

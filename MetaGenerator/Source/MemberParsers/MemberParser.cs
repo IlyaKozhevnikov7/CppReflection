@@ -1,6 +1,5 @@
 ﻿using PCRE;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 
 namespace MetaGenerator
 {
@@ -19,7 +18,7 @@ namespace MetaGenerator
             HeaderParser = headerParser;
         }
 
-        protected IEnumerable<PcreMatch> FindMatches(string pattern, string text) => new PcreRegex(pattern).Matches(text);
+        protected static IEnumerable<PcreMatch> FindMatches(string pattern, string text) => new PcreRegex(pattern).Matches(text);
 
         protected static AttributeInfo[] ParseAttributes(string attributeDefinitions)
         {
@@ -30,7 +29,7 @@ namespace MetaGenerator
 
             int bracketNesting = 0;
             int quoteNesting = 0;
-
+            
             (int, int) attributeNameBound = (0, attributeDefinitions.Length);
             (int, int) attributeArgsBound = (0, 0);
 
@@ -99,7 +98,5 @@ namespace MetaGenerator
 
             return attributeInfos.Count > 0 ? attributeInfos.ToArray() : null;
         }
-
-        protected string FormatString(string name) => Regex.Replace(name.Trim(), @"\s+", " ");
     }
 }

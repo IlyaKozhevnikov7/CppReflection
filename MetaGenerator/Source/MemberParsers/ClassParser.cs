@@ -11,13 +11,9 @@ namespace MetaGenerator
         {
         }
 
-        public ClassInfo[] Parse()  
+        public ClassInfo[] Parse()
         {
             IEnumerable<PcreMatch> matches = FindMatches(@"\bREFLECTABLE\b(?<attr>\((?:[^()]|(?&attr))*\))\s*(?<templ>\btemplate\b<(?:[^<>]|(?&templ))*>)?\s*(?<!\benum\b)(class|struct)\b[\s\S]*?(?<body>\{(?:[^{}]|(?&body))*\});", HeaderParser.Text);
-
-            if (matches.Count() == 0)
-                return null;
-
             return ParseClassInfos(matches);
         }
 
@@ -58,8 +54,9 @@ namespace MetaGenerator
             info.name = ExcludeClassName(nameSubString, out info.isFinal);
             info.instanceOf = ExcludeInstanceOf(nameSubString);
 
-            if (hasParents)
-                info.parentNames = ExcludeParents(header.Substring(parentsStart + 1, header.Length - parentsStart - 1));
+            info.parentNames = hasParents
+                ? ExcludeParents(header.Substring(parentsStart + 1, header.Length - parentsStart - 1))
+                : [];
         }
 
         private string ExcludeClassName(string subString, out bool isFinal)
@@ -84,9 +81,6 @@ namespace MetaGenerator
         {
             var matches = FindMatches(@"[\S\s]*?(\S+?(?<args>[<(]+?(?:[^<>()]|(?&args))*[>)]+?)?)\s*(,|$)", subString);
             int count = matches.Count();
-
-            if (count == 0)
-                return null;
 
             string[] parents = new string[count];
             int i = 0;

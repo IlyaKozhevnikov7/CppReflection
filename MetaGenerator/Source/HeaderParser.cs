@@ -9,7 +9,7 @@ namespace MetaGenerator
         {
             get
             {
-                if (_classInfos == null && _enumInfos == null)
+                if (_classInfos.Length == 0 && _enumInfos.Length == 0)
                     return null;
 
                 return new FileInfo(_headerInfo.path, _classInfos, _enumInfos);
@@ -39,6 +39,9 @@ namespace MetaGenerator
             ParseNamespaces();
             ParseClasses();
             ParseEnums();
+
+            ProjectData.RegisterClasses(_classInfos);
+            ProjectData.RegisterEnums(_enumInfos);
         }
 
         public string GetNamespaceByPosition(int position)

@@ -35,12 +35,12 @@ namespace MetaGenerator
         public MethodInfo[] methods;
         public string templateParameters;
 
-        public bool HasParents => parentNames != null;
-        public bool HasFileds => fields != null;
-        public bool HasMethods => methods != null;
-        public bool HasVirtualGetType => isFinal == false || parentNames != null;
+        public bool HasParents => parentNames.Length > 0;
+        public bool HasFileds => fields.Length > 0;
+        public bool HasMethods => methods.Length > 0;
+        public bool HasVirtualGetType => isFinal == false || HasParents;
         public bool IsTemplate => templateParameters != null;
         public string TypeOf => instanceOf == InstanceOf.Class ? "class" : "struct";
-
+        public bool NeedInlineMeta => HasParents || HasMethods;
     };
 }

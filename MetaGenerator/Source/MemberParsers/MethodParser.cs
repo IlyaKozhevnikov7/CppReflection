@@ -14,10 +14,6 @@ namespace MetaGenerator
         public MethodInfo[] Parse()
         {
             IEnumerable<PcreMatch> matches = FindMatches(@"METHOD(?<attr>\((?:[^()]|(?&attr))*\))\s*([\w\s:<>()*&,]+)\s+(\w+)\s*(?<args>\((?:[^()]|(?&args))*\))\s*([\w\s:<>()*&]+)?(=)?", Text);
-
-            if (matches.Count() == 0)
-                return null;
-
             return ParseInfos(matches);
         }
 

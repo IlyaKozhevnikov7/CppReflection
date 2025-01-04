@@ -8,6 +8,8 @@ namespace Reflection
 
 	class REFLECTION_API TypePtr
 	{
+		friend class Assembly;
+
 	private:
 
 		const Type* m_Type;

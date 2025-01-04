@@ -12,7 +12,7 @@ namespace Reflection
 	private:
 
 		const char*							m_Name;
-		const std::vector<const Attribute*> m_Attributes;
+		const std::vector<const Attribute*>	m_Attributes;
 
 	public:
 
