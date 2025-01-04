@@ -8,7 +8,7 @@ namespace Reflection
 		if (m_Type == other.m_Type)
 			return true;
 
-		if (m_Type->IsTemplated() == false && other->IsTemplated() == false)
+		if (m_Type->IsGenericType() == false && other->IsGenericType() == false)
 			return false;
 
 		const auto& thisTemplateClassInfo = m_Type->m_InternalInfo.templateClassInfo;

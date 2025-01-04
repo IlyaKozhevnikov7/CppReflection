@@ -8,15 +8,15 @@ template<typename T>
 struct FlagConditional<T, TypeFlag::Abstract> : std::bool_constant<std::is_abstract_v<T>> {};
 
 template<typename T>
-struct FlagConditional<T, TypeFlag::TemplateType>
+struct FlagConditional<T, TypeFlag::GenericType>
 {
 	template<typename>
-	constexpr static bool IsTemplate = false;
+	constexpr static bool IsGenericType = false;
 
 	template<template <typename...> typename T, typename ...TArgs>
-	constexpr static bool IsTemplate<T<TArgs...>> = true;
+	constexpr static bool IsGenericType<T<TArgs...>> = true;
 
-	constexpr static bool value = IsTemplate<T>;
+	constexpr static bool value = IsGenericType<T>;
 };
 
 template<typename T>
@@ -27,7 +27,7 @@ struct ExcludeFlags
 {
 	template<TypeFlag Flag>
 	constexpr static BitMask<TypeFlag> FLAG = FlagConditional<T, Flag>::value ? Flag : TypeFlag(0);
-	constexpr static BitMask<TypeFlag> Flags = FLAG<TypeFlag::Primitive> | FLAG<TypeFlag::Abstract> | FLAG<TypeFlag::TemplateType> | FLAG<TypeFlag::Enum>;
+	constexpr static BitMask<TypeFlag> Flags = FLAG<TypeFlag::Primitive> | FLAG<TypeFlag::Abstract> | FLAG<TypeFlag::GenericType> | FLAG<TypeFlag::Enum>;
 };
 
 struct ClassInfo
@@ -72,10 +72,9 @@ private:
 	void ExcludeTemplateParameterTypes(uint32_t i = 0)
 	{
 		new(&parameterTypes[i]) ParameterType(ParameterType::Initializer<T>{});
-		++i;
 
 		if constexpr (sizeof...(TOther) > 0)
-			ExcludeTemplateParameterTypes<TOther...>(i);
+			ExcludeTemplateParameterTypes<TOther...>(i + 1);
 	}
 };
 

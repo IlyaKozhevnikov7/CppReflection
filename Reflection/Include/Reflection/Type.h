@@ -8,10 +8,10 @@ namespace Reflection
 {
 	enum class TypeFlag : uint8_t
 	{
-		Primitive		= BIT<1>,
-		Abstract		= BIT<2>,
-		TemplateType	= BIT<3>,
-		Enum			= BIT<4>
+		Primitive	= BIT<1>,
+		Abstract	= BIT<2>,
+		GenericType	= BIT<3>,
+		Enum		= BIT<4>
 	};	
 
 	class REFLECTION_API Type : public MemberInfo
@@ -73,9 +73,9 @@ namespace Reflection
 			return m_Flags & TypeFlag::Abstract;
 		}
 
-		bool IsTemplated() const
+		bool IsGenericType() const
 		{
-			return m_Flags & TypeFlag::TemplateType;
+			return m_Flags & TypeFlag::GenericType;
 		}
 
 		bool IsEnum() const
@@ -173,8 +173,7 @@ namespace Reflection
 		}
 
 		/*
-		*	TODO: rename generic
-		*	Template type
+		*	Generic type
 		*/
 		template<typename T>
 		Type(const char* templateName, const char* namespaceName, const char* name, std::initializer_list<ParentInfo> parentInfos, std::initializer_list<FieldInfo> fieldInfos, std::initializer_list<MethodInfo> methodInfos, GetActualTypeSignature getActualType, T*) :

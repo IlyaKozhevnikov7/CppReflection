@@ -135,16 +135,15 @@ namespace Reflection
 			return m_ReturnType == ParameterType(ParameterType::Initializer<T>{});
 		}
 
-		template<typename T, typename TNext, typename ...TOther>
+		template<typename T, typename ...TOther>
 		bool CheckParameterTypes(uint32_t i) const
 		{
-			return CheckParameterTypes<T>(i) && CheckParameterTypes<TNext, TOther...>(i + 1);
-		}
+			const bool result = m_Parameters[i] == ParameterType(ParameterType::Initializer<T>{});
+			if (result == false)
+				return false;
 
-		template<typename T>
-		bool CheckParameterTypes(uint32_t i) const
-		{
-			return m_Parameters[i] == ParameterType(ParameterType::Initializer<T>{});
+			if constexpr (sizeof...(TOther) > 0)
+				return CheckParameterTypes<TOther...>(i + 1);
 		}
 	};
 }
