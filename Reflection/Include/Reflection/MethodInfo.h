@@ -49,8 +49,8 @@ namespace Reflection
 		template<typename TReturn = void, typename T = void*, typename ...TArgs>
 		TReturn Invoke(T* object, TArgs... args) const
 		{
-			assert((CheckSiganture<TReturn, TArgs...>()) && "Signature mismatch.");
-			assert(IsStatic() == false);
+			assert((CheckSiganture<TReturn, TArgs...>()) && "Method signature mismatch");
+			assert(IsStatic() == false && "Method is static");
 
 			if (IsConst())
 			{
@@ -67,7 +67,7 @@ namespace Reflection
 		template<typename TReturn = void, typename ...TArgs>
 		TReturn InvokeStatic(TArgs... args) const
 		{
-			assert(IsStatic());
+			assert(IsStatic() && "Method isn`t static");
 			return FunctionInfo::Invoke<TReturn>(std::forward<TArgs>(args)...);
 		}
 

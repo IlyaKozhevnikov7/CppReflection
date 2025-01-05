@@ -25,7 +25,7 @@ namespace Reflection
 
 		std::span<const TypePtr> GetTypes() const
 		{
-			return { m_Types.data(), m_Types.size() };
+			return m_Types;
 		}
 
 		TypePtr GetType(const char* name, const char* namespaceName = nullptr) const;

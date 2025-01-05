@@ -9,9 +9,9 @@ namespace MetaGenerator
             string converter = Context.HasNamespace ? "__GEN_REFLECTION_NAMESPACE_CONVERTER" : "__GEN_REFLECTION_NULL_NAMESPACE_CONVERTER";
             string typeOf = Context.templateParameters + ' ' + Context.TypeOf;
 
-            Builder.Append($"__GEN_REFLECTION_TEMPLATE_TYPE_FORWARD_DECLARATION_BEGIN(__GEN_ARG({typeOf}), {Context.name}, {wrapper}, {converter}, {Context.namespaceName})\n")
-                .Append("\t__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_NO_PARENT_INFO\n");
+            Builder.Append($"__GEN_REFLECTION_TEMPLATE_TYPE_FORWARD_DECLARATION_BEGIN(__GEN_ARG({typeOf}), {Context.name}, {wrapper}, {converter}, {Context.namespaceName})\n");
 
+            Launch<ParentInfoGenerator, ClassInfo>(Builder, Context);
             Launch<TemplateFieldInfoGenerator, ClassInfo>(Builder, Context);
             Launch<TemplateMethodInfoGenerator, ClassInfo>(Builder, Context);
 

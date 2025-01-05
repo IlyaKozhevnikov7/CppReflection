@@ -27,7 +27,7 @@ namespace Reflection
 			return m_Name;
 		}
 
-		const std::vector<const Attribute*>& GetAttributes() const
+		std::span<const Attribute* const> GetAttributes() const
 		{
 			return m_Attributes;
 		}

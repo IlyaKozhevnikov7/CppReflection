@@ -50,13 +50,6 @@ namespace Reflection
 			return m_Namespace;
 		}
 
-		std::span<const ParentInfo> GetParentInfos() const
-		{
-			if (IsEnum())
-				return std::span<const ParentInfo>();
-
-			return m_InternalInfo.classInfo.parentInfos;
-		}
 
 		BitMask<TypeFlag> GetFlags() const
 		{
@@ -90,18 +83,28 @@ namespace Reflection
 				: m_InternalInfo.classInfo.parentInfos.empty() == false;
 		}
 
-		const std::span<const FieldInfo> GetFields() const
+		std::span<const ParentInfo> GetParentInfos() const
 		{
-			return IsEnum()
-				? std::span<const FieldInfo>()
-				: m_InternalInfo.classInfo.fieldInfos;
+			if (IsEnum())
+				return {};
+
+			return m_InternalInfo.classInfo.parentInfos;
 		}
 
-		const std::span<const MethodInfo> GetMethods() const
+		std::span<const FieldInfo> GetFields() const
 		{
-			return IsEnum()
-				? std::span<const MethodInfo>()
-				: m_InternalInfo.classInfo.methodInfos;
+			if (IsEnum())
+				return {};
+
+			return m_InternalInfo.classInfo.fieldInfos;
+		}
+
+		std::span<const MethodInfo> GetMethods() const
+		{
+			if (IsEnum())
+				return {};
+
+			return m_InternalInfo.classInfo.methodInfos;
 		}
 
 		TypePtr GetEnumBaseType() const
@@ -111,11 +114,12 @@ namespace Reflection
 				: nullptr;
 		}
 
-		const std::span<const EnumValue> GetEnumValues() const
+		std::span<const EnumValue> GetEnumValues() const
 		{
-			return IsEnum()
-				? m_InternalInfo.enumInfo.values
-				: std::span<const EnumValue>();
+			if (IsEnum())
+				return m_InternalInfo.enumInfo.values;
+
+			return {};
 		}
 
 		const FieldInfo* GetField(const char* name) const;
@@ -155,7 +159,6 @@ namespace Reflection
 			m_Namespace(nullptr),
 			m_GetActualType(nullptr)
 		{
-			new(&m_InternalInfo) TypeInternalInfo();
 		}
 
 		/*

@@ -29,7 +29,10 @@ namespace Reflection
 			return m_Parameters.size();
 		}
 
-		void GetParameters(const ParameterType** parameters) const;
+		std::span<const ParameterType> GetParameters() const
+		{
+			return m_Parameters;
+		}
 
 		template<typename TReturn, typename ...TArgs>
 		bool CheckSiganture() const
@@ -43,14 +46,14 @@ namespace Reflection
 			}
 			else
 			{
-				return m_Parameters.size() == sizeof...(TArgs) && CheckParameterTypes<TArgs...>(0);
+				return m_Parameters.size() == sizeof...(TArgs) && CheckParameterTypes<TArgs...>();
 			}
 		}
 
 		template<typename TReturn, typename ...TArgs>
 		TReturn Invoke(TArgs... args) const
 		{
-			assert((CheckSiganture<TReturn, TArgs...>()) && "Signature mismatch.");
+			assert((CheckSiganture<TReturn, TArgs...>()) && "Function signature mismatch");
 
 			using Signature = TReturn(*)(TArgs...);
 			return GetAddress<Signature>()(std::forward<TArgs>(args)...);
@@ -97,7 +100,6 @@ namespace Reflection
 		template<typename Siganture>
 		Siganture GetAddress() const
 		{
-			//assert((CheckSiganture<Siganture>()));
 			return *(Siganture*)(&m_Address);
 		}
 
@@ -136,7 +138,7 @@ namespace Reflection
 		}
 
 		template<typename T, typename ...TOther>
-		bool CheckParameterTypes(uint32_t i) const
+		bool CheckParameterTypes(uint32_t i = 0) const
 		{
 			const bool result = m_Parameters[i] == ParameterType(ParameterType::Initializer<T>{});
 			if (result == false)
