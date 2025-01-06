@@ -6,11 +6,11 @@ namespace MetaGenerator
     {
         public override void Run()
         {
-            string virtualModificator = Context.HasVirtualGetType ? "__GEN_VIRTUAL_MODIFICATION" : "__GEN_EMPTY_MODIFICATION";
+            string virtualSpecifier = Context.HasVirtualGetType ? "__GEN_VIRTUAL_SPECIFIER" : "__GEN_EMPTY_SPECIFIER";
 
             Builder.Append(GENERATED_FILE_HEADER_TEXT)
                 .Append($"#define __THIS_TYPE__ {Context.name}\n")
-                .Append($"__GEN_REFLECTION_TYPE_INLINE_CORE({virtualModificator})\n");
+                .Append($"__GEN_REFLECTION_TYPE_INLINE_CORE({virtualSpecifier})\n");
 
             if (Context.NeedInlineMeta)
             {

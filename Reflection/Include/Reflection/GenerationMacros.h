@@ -238,14 +238,14 @@
 *	========== Inline generation ==========
 */
 
-#define __GEN_VIRTUAL_MODIFICATION virtual
-#define __GEN_EMPTY_MODIFICATION
+#define __GEN_VIRTUAL_SPECIFIER virtual
+#define __GEN_EMPTY_SPECIFIER
 
-#define __GEN_REFLECTION_TYPE_INLINE_CORE(VirtualModificator) \
+#define __GEN_REFLECTION_TYPE_INLINE_CORE(VirtualSpecifier) \
 	private: \
 		friend Reflection::TypeOf<__THIS_TYPE__>; \
 	public: \
-		VirtualModificator Reflection::TypePtr GetType() const \
+		VirtualSpecifier Reflection::TypePtr GetType() const \
 		{ \
 			return Reflection::TypeOf<__THIS_TYPE__>::Get(); \
 		} \

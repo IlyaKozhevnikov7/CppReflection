@@ -72,19 +72,11 @@ namespace MetaGenerator
                 int memberId = 0;
                 Builder.Append($"\t\tconst char* GetTemplateMemberName_{classFullName}_{memberId++}() {{ return\"{classInfo.name}\"; }}\n");
 
-                if (classInfo.HasFileds)
-                {
-                    for (int i = 0; i < classInfo.fields.Length; i++)
-                        AddendTemplateMemberNameFunction(Builder, classFullName, memberId++, classInfo.fields[i].name);
-                }
+                for (int i = 0; i < classInfo.fields.Length; i++)
+                    AddendTemplateMemberNameFunction(Builder, classFullName, memberId++, classInfo.fields[i].name);
 
-                if (classInfo.HasMethods)
-                {
-                    for (int i = 0; i < classInfo.methods.Length; i++)
-                    {
-                        AddendTemplateMemberNameFunction(Builder, classFullName, memberId++, classInfo.methods[i].name);
-                    }
-                }
+                for (int i = 0; i < classInfo.methods.Length; i++)
+                    AddendTemplateMemberNameFunction(Builder, classFullName, memberId++, classInfo.methods[i].name);
             }
 
             Builder.Append("\t}\n");
