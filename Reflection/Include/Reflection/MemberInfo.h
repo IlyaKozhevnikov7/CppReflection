@@ -7,24 +7,17 @@ namespace Reflection
 {
 	class Attribute;
 
-	class MemberInfo
+	class MemberInfoBase
 	{
 	private:
 
-		const char*							m_Name;
 		const std::vector<const Attribute*>	m_Attributes;
 
 	public:
 
-		MemberInfo(std::initializer_list<const Attribute*> attributes, const char* name) :
-			m_Name(name),
+		MemberInfoBase(std::initializer_list<const Attribute*> attributes) :
 			m_Attributes(attributes)
 		{
-		}
-
-		const char* GetName() const
-		{
-			return m_Name;
 		}
 
 		std::span<const Attribute* const> GetAttributes() const
@@ -46,6 +39,30 @@ namespace Reflection
 		bool HasAttribute() const
 		{
 			return GetAttribute<T>() != nullptr;
+		}
+	};
+
+	/*
+	*	Used to describe named members
+	*/
+	class MemberInfo : public MemberInfoBase
+	{
+	private:
+
+		const char*							m_Name;
+
+
+	public:
+
+		MemberInfo(std::initializer_list<const Attribute*> attributes, const char* name) :
+			MemberInfoBase(attributes),
+			m_Name(name)
+		{
+		}
+
+		const char* GetName() const
+		{
+			return m_Name;
 		}
 	};
 }
