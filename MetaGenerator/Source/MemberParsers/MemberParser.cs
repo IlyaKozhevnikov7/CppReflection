@@ -1,22 +1,12 @@
 ﻿using PCRE;
+using System;
 using System.Collections.Generic;
 
 namespace MetaGenerator
 {
-    public class MemberParser
+    public abstract class MemberParser
     {
-        protected string Text { get; private set; }
-        protected HeaderParser HeaderParser { get; private set; }
-
-        public MemberParser(string text) 
-        {
-            Text = text;
-        }
-
-        public MemberParser(HeaderParser headerParser)
-        {
-            HeaderParser = headerParser;
-        }
+        public abstract string Text { get; }
 
         protected static IEnumerable<PcreMatch> FindMatches(string pattern, string text) => new PcreRegex(pattern).Matches(text);
 
@@ -97,6 +87,30 @@ namespace MetaGenerator
             });
 
             return attributeInfos.Count > 0 ? attributeInfos.ToArray() : null;
+        }
+    }
+
+
+    public abstract class PrimaryMemberParser : MemberParser
+    {
+        public HeaderParser HeaderParser { get; set; }
+        public override string Text => HeaderParser.Text;
+
+        public PrimaryMemberParser(HeaderParser headerParser)
+        {
+            HeaderParser = headerParser;
+        }
+    }
+
+    public abstract class SecondaryMemberParser : MemberParser
+    {
+        private string _text;
+
+        public override string Text => _text;
+
+        public SecondaryMemberParser(string text)
+        {
+            _text = text;
         }
     }
 }

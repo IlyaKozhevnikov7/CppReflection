@@ -101,6 +101,57 @@ namespace Reflection
 	
 	public:
 	
+		class Excluder
+		{
+		private:
+
+			ParameterType* m_Parameters;
+
+		public:
+
+			Excluder(const ParameterType* parameters) :
+				m_Parameters(const_cast<ParameterType*>(parameters))
+			{
+			}
+
+			template<size_t I, typename T, typename... TOther>
+			void Process() const
+			{
+				new(&m_Parameters[I]) ParameterType(ParameterType::Initializer<T>{});
+
+				if constexpr (sizeof...(TOther) > 0)
+				{
+					Process<I + 1, TOther...>();
+				}
+			}
+		};
+
+		class Comparator
+		{
+		private:
+
+			const ParameterType* m_Parameters;
+			
+		public:
+
+			Comparator(const ParameterType* parameters) :
+				m_Parameters(parameters)
+			{
+			}
+
+			template<size_t I, typename T, typename ...TOther>
+			bool Process()
+			{
+				if ((m_Parameters[I] == ParameterType::Initializer<T>{}) == false)
+					return false;
+
+				if constexpr (sizeof...(TOther) > 0)
+				{
+					return Process<I + 1, TOther...>();
+				}
+			}
+		};
+
 		template<typename T>
 		struct Initializer
 		{

@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace MetaGenerator
 {
-    internal class MethodParser : MemberParser
+    public class MethodParser : SecondaryMemberParser
     {
         public MethodParser(string text) : base(text)
         {

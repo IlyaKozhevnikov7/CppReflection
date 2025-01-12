@@ -2,6 +2,7 @@
 
 #include "Reflection/FieldInfo.h"
 #include "Reflection/MethodInfo.h"
+#include "Reflection/LifetimeControl.h"
 #include "Reflection/EnumValue.h"
 
 namespace Reflection
@@ -36,6 +37,7 @@ namespace Reflection
 		const size_t			m_Size;
 		const char*				m_Namespace;
 		const BitMask<TypeFlag>	m_Flags;
+		const LifetimeControl	m_LifetimeControl;
 		GetActualTypeSignature	m_GetActualType;
 
 	public:
@@ -49,7 +51,6 @@ namespace Reflection
 		{
 			return m_Namespace;
 		}
-
 
 		BitMask<TypeFlag> GetFlags() const
 		{
@@ -81,6 +82,13 @@ namespace Reflection
 			return IsEnum()
 				? false
 				: m_InternalInfo.classInfo.parentInfos.empty() == false;
+		}
+
+		const LifetimeControl* GetLifetimeControl() const
+		{
+			return m_LifetimeControl.IsValid()
+				? &m_LifetimeControl
+				: nullptr;
 		}
 
 		std::span<const ParentInfo> GetParentInfos() const
@@ -165,26 +173,28 @@ namespace Reflection
 		*	Construct class/struct type
 		*/
 		template<typename T>
-		Type(const char* namespaceName, const char* name, std::initializer_list<ParentInfo> parentInfos, std::initializer_list<FieldInfo> fieldInfos, std::initializer_list<MethodInfo> methodInfos, GetActualTypeSignature getActualType, T*) :
-			MemberInfo({}, name),
+		Type(const char* namespaceName, const char* name, std::initializer_list<const Attribute*> attributes, std::initializer_list<ParentInfo> parentInfos, std::initializer_list<FieldInfo> fieldInfos, std::initializer_list<MethodInfo> methodInfos, LifetimeControl lifetimeControl, GetActualTypeSignature getActualType, T*) :
+			MemberInfo(attributes, name),
 			m_Size(Generation::SizeOf<T>),
 			m_Namespace(namespaceName),
 			m_Flags(ExcludeFlags<T>::Flags),
 			m_GetActualType(getActualType),
+			m_LifetimeControl(lifetimeControl),
 			m_InternalInfo(parentInfos, fieldInfos, methodInfos, (T*)nullptr)
 		{
 		}
 
 		/*
-		*	Generic type
+		*	Construct generic type
 		*/
 		template<typename T>
-		Type(const char* templateName, const char* namespaceName, const char* name, std::initializer_list<ParentInfo> parentInfos, std::initializer_list<FieldInfo> fieldInfos, std::initializer_list<MethodInfo> methodInfos, GetActualTypeSignature getActualType, T*) :
-			MemberInfo({}, name),
+		Type(const char* templateName, const char* namespaceName, const char* name, std::initializer_list<const Attribute*> attributes, std::initializer_list<ParentInfo> parentInfos, std::initializer_list<FieldInfo> fieldInfos, std::initializer_list<MethodInfo> methodInfos, LifetimeControl lifetimeControl, GetActualTypeSignature getActualType, T*) :
+			MemberInfo(attributes, name),
 			m_Size(Generation::SizeOf<T>),
 			m_Namespace(namespaceName),
 			m_Flags(ExcludeFlags<T>::Flags),
 			m_GetActualType(getActualType),
+			m_LifetimeControl(lifetimeControl),
 			m_InternalInfo(templateName, parentInfos, fieldInfos, methodInfos, (T*)nullptr)
 		{
 		}
@@ -199,6 +209,7 @@ namespace Reflection
 			m_Namespace(namespaceName),
 			m_Flags(ExcludeFlags<T>::Flags),
 			m_GetActualType(nullptr),
+			m_LifetimeControl({ { {}, &Generaion::EnumProxyCtor<T>::Func }}, nullptr),
 			m_InternalInfo((T*)nullptr)
 		{
 		}

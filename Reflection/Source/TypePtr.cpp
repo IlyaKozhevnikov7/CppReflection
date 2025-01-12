@@ -8,6 +8,9 @@ namespace Reflection
 		if (m_Type == other.m_Type)
 			return true;
 
+		if (m_Type == nullptr || other.m_Type == nullptr)
+			return false;
+
 		if (m_Type->IsGenericType() == false && other->IsGenericType() == false)
 			return false;
 

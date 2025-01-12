@@ -31,7 +31,7 @@ namespace Reflection
 	template<typename T>
 	struct EnumValues
 	{
-		constexpr static const std::span<const EnumValue> Get()
+		constexpr static std::span<const EnumValue> Get()
 		{
 			return { };
 		}

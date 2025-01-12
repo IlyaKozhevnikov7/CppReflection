@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace MetaGenerator
 {
-    internal class EnumParser : MemberParser
+    internal class EnumParser : PrimaryMemberParser
     {
         public EnumParser(HeaderParser headerParser) : base(headerParser)
         {
@@ -13,13 +13,13 @@ namespace MetaGenerator
 
         public EnumInfo[] Parse()
         {
-            IEnumerable<PcreMatch> matches = FindMatches(@"REFLECTABLE(?<rec>\((?:[^()]|(?&rec))*\))(\s*enum\s+(class\s+)?(\S+)[\s\S]+?){([\s\S]*?)};", HeaderParser.Text);
+            IEnumerable<PcreMatch> matches = FindMatches(@"REFLECTABLE(?<rec>\((?:[^()]|(?&rec))*\))(\s*enum\s+(class\s+)?(\S+)[\s\S]+?){([\s\S]*?)};", HeaderParser.Text.ToString());
             return ParseInfos(matches);
         }
 
         private EnumInfo[] ParseInfos(IEnumerable<PcreMatch> matches)
         {
-            var infos = MemberInfo.Construct<EnumInfo>(matches.Count());
+            var infos = MemberInfoBase.Construct<EnumInfo>(matches.Count());
 
             int i = 0;
             foreach (var match in matches)

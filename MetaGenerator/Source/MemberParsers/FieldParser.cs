@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace MetaGenerator
 {
-    internal class FieldParser : MemberParser
+    internal class FieldParser : SecondaryMemberParser
     {
         public FieldParser(string text) : base(text)
         {
@@ -19,7 +19,7 @@ namespace MetaGenerator
 
         private FieldInfo[] ParseInfos(IEnumerable<PcreMatch> matches)
         {
-            var infos = MemberInfo.Construct<FieldInfo>(matches.Count());
+            var infos = MemberInfoBase.Construct<FieldInfo>(matches.Count());
 
             int i = 0;
             foreach (var match in matches)

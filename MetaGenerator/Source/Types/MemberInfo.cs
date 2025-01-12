@@ -1,14 +1,13 @@
 ﻿
 namespace MetaGenerator
 {
-    public class MemberInfo
+    public class MemberInfoBase
     {
-        public string name;
         public AttributeInfo[] attributeInfos;
 
         public bool HasAttributes => attributeInfos != null;
-
-        public static T[] Construct<T>(int count) where T : MemberInfo, new()
+        
+        public static T[] Construct<T>(int count) where T : MemberInfoBase, new()
         {
             var infos = new T[count];
 
@@ -17,5 +16,10 @@ namespace MetaGenerator
 
             return infos;
         }
+    }
+
+    public class MemberInfo : MemberInfoBase
+    {
+        public string name;
     }
 }

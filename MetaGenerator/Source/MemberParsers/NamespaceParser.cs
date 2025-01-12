@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace MetaGenerator
 {
-    internal class NamespaceInfo
+    public class NamespaceInfo
     {
         public readonly string Name;
         private readonly int _startPosition;
@@ -19,11 +19,11 @@ namespace MetaGenerator
         public bool IsBound(int position) => position > _startPosition && position < _endPosition;
     }
 
-    internal class NamespaceParser : MemberParser
+    public class NamespaceParser : PrimaryMemberParser
     {
         private readonly List<NamespaceInfo> _namespaceInfos = [];
 
-        public NamespaceParser(string text) : base(text)
+        public NamespaceParser(HeaderParser headerParser) : base(headerParser)
         {
         }
 

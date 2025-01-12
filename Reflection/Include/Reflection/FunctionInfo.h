@@ -78,6 +78,32 @@ namespace Reflection
 			}
 		};
 
+		class ParameterTypesExcluder
+		{
+		private:
+
+			ParameterType* m_Parameters;
+			uint32_t m_Index;
+
+		public:
+
+			ParameterTypesExcluder(FunctionInfo& info) :
+				m_Parameters(const_cast<ParameterType*>(info.m_Parameters.data())),
+				m_Index(0)
+			{
+			}
+
+			template<typename T, typename ...TArgs>
+			void Exclude()
+			{
+				new(&m_Parameters[m_Index]) ParameterType(ParameterType::Initializer<T>{});
+				++m_Index;
+
+				if constexpr (sizeof...(TArgs) > 0)
+					Exclude<TArgs...>();
+			}
+		};
+
 	public:
 
 		template<typename TReturn, typename ...TArgs, typename Info = FunctionMetaInfo<TReturn, TArgs...>>
@@ -103,32 +129,6 @@ namespace Reflection
 			return *(Siganture*)(&m_Address);
 		}
 
-		class ParameterTypesExcluder
-		{
-		private:
-
-			ParameterType* m_Parameters;
-			uint32_t m_Index;
-
-		public:
-
-			ParameterTypesExcluder(FunctionInfo& info) :
-				m_Parameters(const_cast<ParameterType*>(info.m_Parameters.data())),
-				m_Index(0)
-			{
-			}
-
-			template<typename T, typename ...TArgs>
-			void Exclude()
-			{
-				new(&m_Parameters[m_Index]) ParameterType(ParameterType::Initializer<T>{});
-				++m_Index;
-				
-				if constexpr (sizeof...(TArgs) > 0)
-					Exclude<TArgs...>();
-			}
-		};
-
 	private:
 
 		template<typename T>
@@ -140,12 +140,13 @@ namespace Reflection
 		template<typename T, typename ...TOther>
 		bool CheckParameterTypes(uint32_t i = 0) const
 		{
-			const bool result = m_Parameters[i] == ParameterType(ParameterType::Initializer<T>{});
-			if (result == false)
+			if ((m_Parameters[i] == ParameterType(ParameterType::Initializer<T>{})) == false)
 				return false;
 
 			if constexpr (sizeof...(TOther) > 0)
+			{
 				return CheckParameterTypes<TOther...>(i + 1);
+			}
 		}
 	};
 }

@@ -93,12 +93,6 @@ public:
 	}
 };
 
-struct TemplateInfo
-{
-	const char* name;
-	std::vector<ParameterType>	parameterTypes;
-};
-
 union TypeInternalInfo
 {
 	ClassInfo			classInfo;

@@ -16,5 +16,6 @@
 *	Main macro that is used to indicate that a type or its member uses reflection
 */
 #define REFLECTABLE(...)
+#define CONSTRUCTOR(...)
 #define FIELD(...)
 #define METHOD(...)

@@ -23,7 +23,7 @@
 		const char* TypeOf<T>::GetName() { return __GEN_TO_STRING(Name); } \
 		TypePtr TypeOf<T>::Get() \
 		{ \
-			static Type type(nullptr, GetName(), {}, {}, {}, nullptr, (T*)nullptr); \
+			static Type type(nullptr, GetName(), {}, {}, {}, {}, {}, nullptr, (T*)nullptr); \
 			return &type; \
 		} \
 	} \
@@ -97,6 +97,7 @@
 	{ \
 		return nullptr; \
 	} \
+
 /*
 *  ========== Type generation ==========
 */
@@ -109,6 +110,10 @@
 #define	__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_ATTRIBUTE_END },
 #define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_NO_ATTRIBUTES  { { },
 #define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_TYPE_NO_ATTRIBUTES { },
+
+#define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_ATTRIBUTES_BEGIN_T {
+#define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_ATTRIBUTES_END_T },
+#define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_NO_ATTRIBUTES_T { },
 
 /*
 *  ---------- Class/Struct ----------
@@ -159,6 +164,16 @@
 #define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_METHOD_INFO(Name, Id, Flags) __GEN_TO_STRING(Name), &__CURRENT_TYPE__::Name, {}, (const __CURRENT_TYPE__*)nullptr, decltype(&__CURRENT_TYPE__::__GEN_REFLECTION_TYPE_META::_##Id)(nullptr), Reflection::MethodFlags(Flags) },
 
 #define	__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_METHOD_INFOS_END },
+
+/*
+*  ---------- Constructore ----------
+*/
+#define	__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_NO_CONSTRUCTOR_INFO { },
+
+#define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_CONSTRUCTORS_BEGIN {{
+#define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_CONSTRUCTOR_INFO(Id) &Generation::ProxyCtor<__CURRENT_TYPE__, decltype(__CURRENT_TYPE__::__GEN_REFLECTION_TYPE_META::c##Id)>::Func },
+
+#define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_CONSTRUCTORS_END }, &Generation::ProxyDestructor<__CURRENT_TYPE__>::Func },
 
 /*
 *  ========== Template generation ==========

@@ -33,14 +33,16 @@ namespace MetaGenerator
         public string[] parentNames;
         public FieldInfo[] fields;
         public MethodInfo[] methods;
+        public ConstructorInfo[] constructors;
         public string templateParameters;
 
         public bool HasParents => parentNames.Length > 0;
         public bool HasFileds => fields.Length > 0;
         public bool HasMethods => methods.Length > 0;
+        public bool HasConstructors => constructors.Length > 0;
         public bool HasVirtualGetType => isFinal == false || HasParents;
         public bool IsTemplate => templateParameters != null;
         public string TypeOf => instanceOf == InstanceOf.Class ? "class" : "struct";
-        public bool NeedInlineMeta => HasParents || HasMethods;
+        public bool NeedInlineMeta => HasParents || HasMethods || HasConstructors;
     };
 }

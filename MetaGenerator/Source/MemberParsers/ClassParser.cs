@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace MetaGenerator
 {
-    internal class ClassParser : MemberParser
+    public class ClassParser : PrimaryMemberParser
     {
         public ClassParser(HeaderParser headerParser) : base(headerParser)
         {
@@ -13,25 +13,26 @@ namespace MetaGenerator
 
         public ClassInfo[] Parse()
         {
-            IEnumerable<PcreMatch> matches = FindMatches(@"\bREFLECTABLE\b(?<attr>\((?:[^()]|(?&attr))*\))\s*(?<templ>\btemplate\b<(?:[^<>]|(?&templ))*>)?\s*(?<!\benum\b)(class|struct)\b[\s\S]*?(?<body>\{(?:[^{}]|(?&body))*\});", HeaderParser.Text);
+            IEnumerable<PcreMatch> matches = FindMatches(@"REFLECTABLE(?<attr>\((?:[^()]|(?&attr))*\))\s*(?<templ>\btemplate\b<(?:[^<>]|(?&templ))*>)?\s*(?<!\benum\b)(class|struct)\b[\s\S]*?(?<body>\{(?:[^{}]|(?&body))*\});", Text);
             return ParseClassInfos(matches);
         }
 
         private ClassInfo[] ParseClassInfos(IEnumerable<PcreMatch> matches)
         {
-            var classInfos = MemberInfo.Construct<ClassInfo>(matches.Count());
+            var classInfos = MemberInfoBase.Construct<ClassInfo>(matches.Count());
 
             int i = 0;
             foreach (var match in matches)
             {
                 var bodyGroup = match["body"];
                 int headerStart = match["attr"].EndIndex;
-                string header = HeaderParser.Text.Substring(headerStart, bodyGroup.Index - headerStart);
+                string header = Text.Substring(headerStart, bodyGroup.Index - headerStart);
 
                 ParseClassHeader(header, ref classInfos[i]);
                 classInfos[i].namespaceName = HeaderParser.GetNamespaceByPosition(match.Index);
                 classInfos[i].fields = ParseFieldInfos(bodyGroup.Value);
                 classInfos[i].methods = ParseMethodInfos(bodyGroup.Value);
+                classInfos[i].constructors = ParseConstructorInfos(bodyGroup.Value, classInfos[i].name);
 
                 var templMatch = match["templ"];
                 classInfos[i].templateParameters = templMatch.Success ? templMatch.Value : null;
@@ -94,6 +95,7 @@ namespace MetaGenerator
         }
 
         private FieldInfo[] ParseFieldInfos(string body) => new FieldParser(body).Parse();
+        private ConstructorInfo[] ParseConstructorInfos(string body, string className) => new ConstructorParser(body).Parse(className);
         private MethodInfo[] ParseMethodInfos(string body) => new MethodParser(body).Parse();
     }
 }

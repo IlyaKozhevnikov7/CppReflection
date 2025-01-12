@@ -21,8 +21,9 @@ namespace MetaGenerator
         private EnumInfo[] _enumInfos = null;
         private NamespaceInfo[] _namespaceInfos = null;
 
+        private ref string TextRef => ref _headerInfo.text;
+
         public string Text => _headerInfo.text;
-        private ref string HeaderText => ref _headerInfo.text;
 
         public HeaderParser(in HeaderInfo headerInfo)
         {
@@ -31,14 +32,14 @@ namespace MetaGenerator
 
         public void Parse()
         {
-            if (string.IsNullOrEmpty(HeaderText))
+            if (string.IsNullOrEmpty(TextRef))
                 return;
 
-            RemoveAllComments(ref HeaderText);
+            RemoveAllComments();
 
-            ParseNamespaces();
-            ParseClasses();
-            ParseEnums();
+            _namespaceInfos = ParseNamespaces();
+            _classInfos = ParseClasses();
+            _enumInfos = ParseEnums();
 
             ProjectData.RegisterClasses(_classInfos);
             ProjectData.RegisterEnums(_enumInfos);
@@ -68,16 +69,16 @@ namespace MetaGenerator
                 : null;
         }
 
-        private void ParseNamespaces() => _namespaceInfos = new NamespaceParser(HeaderText).Parse();
+        private NamespaceInfo[] ParseNamespaces() => new NamespaceParser(this).Parse();
 
-        private void ParseClasses() => _classInfos = new ClassParser(this).Parse();
+        private ClassInfo[] ParseClasses() => new ClassParser(this).Parse();
 
-        private void ParseEnums() => _enumInfos = new EnumParser(this).Parse();
+        private EnumInfo[] ParseEnums() => new EnumParser(this).Parse();
 
-        private static void RemoveAllComments(ref string data)
+        private void RemoveAllComments()
         {
-            data = Regex.Replace(data, @"\/{2,}.*", string.Empty);
-            data = Regex.Replace(data, @"\/\*[\s\S]*?\*\/", string.Empty);
+            TextRef = Regex.Replace(TextRef, @"\/{2,}.*", string.Empty);
+            TextRef = Regex.Replace(TextRef, @"\/\*[\s\S]*?\*\/", string.Empty);
         }
     }
 }

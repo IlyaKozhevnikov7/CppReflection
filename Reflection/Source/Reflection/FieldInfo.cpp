@@ -1,5 +1,4 @@
 #include "Reflection/FieldInfo.h"
-#include "Reflection/Type.h"
 
 namespace Reflection
 {

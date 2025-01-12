@@ -19,6 +19,12 @@ namespace MetaGenerator
                 for (int i = 0; i < Context.parentNames.Length; i++)
                     Builder.Append($"\tusing TParent{i}={Context.parentNames[i]};\n");
 
+                for (int i = 0; i < Context.constructors.Length; i++)
+                {
+                    var argsDeclaration = Context.constructors[i].parameters;
+                    Builder.Append($"\tstatic void c{i}{argsDeclaration};\n");
+                }
+
                 for (int i = 0; i < Context.methods.Length; i++)
                 {
                     var declarationInfo = Context.methods[i].declarationInfo;

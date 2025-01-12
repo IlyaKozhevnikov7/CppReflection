@@ -26,7 +26,7 @@ namespace Reflection
 		}
 
 		template<typename T>
-		const T* GetAttribute() const
+		T* GetAttribute() const
 		{
 			for (auto attribute : m_Attributes)
 				if (attribute->GetType() == TypeOf<T>::Get())
@@ -49,8 +49,7 @@ namespace Reflection
 	{
 	private:
 
-		const char*							m_Name;
-
+		const char*	m_Name;
 
 	public:
 

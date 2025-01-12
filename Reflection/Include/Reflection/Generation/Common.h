@@ -23,13 +23,13 @@ namespace Reflection::Generation
 	template<typename T, typename U>
 	size_t GetOffsetOfField(U T::* field)
 	{
-		return reinterpret_cast<size_t>(&(((T*)0)->*field));
+		return (size_t)(&(((T*)0)->*field));
 	}
 
 	template<typename U>
 	size_t GetOffsetOfField(U* field)
 	{
-		return reinterpret_cast<size_t>(field);
+		return (size_t)(field);
 	}
 
 	template<typename T>
@@ -40,3 +40,27 @@ namespace Reflection::Generation
 }
 
 #include "Reflection/Generation/GenericTypeName.h"
+
+namespace Reflection::Generation
+{
+	template<typename T, typename TSignature>
+	struct ProxyCtor;
+
+	template<typename T, typename... TArgs>
+	struct ProxyCtor<T, void(TArgs...)>
+	{
+		static void Func(void* ptr, TArgs... args)
+		{
+			new(ptr) T(std::forward<TArgs>(args)...);
+		}
+	};
+
+	template<typename T>
+	struct ProxyDestructor
+	{
+		static void Func(void* ptr)
+		{
+			((T*)ptr)->~T();
+		}
+	};
+}

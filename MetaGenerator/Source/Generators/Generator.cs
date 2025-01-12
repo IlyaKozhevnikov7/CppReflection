@@ -36,7 +36,7 @@ namespace MetaGenerator
 
     public abstract class Generator<TContext> : Generator
     {
-        protected TContext Context { get; private set; }
+        public TContext Context { get; private set; }
 
         public void SetContext(TContext context) => Context = context;
     }
