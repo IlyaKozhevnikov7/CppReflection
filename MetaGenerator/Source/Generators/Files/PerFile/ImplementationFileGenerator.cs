@@ -49,9 +49,11 @@ namespace MetaGenerator
 
                 Builder.Append($"\n#undef __CURRENT_TYPE__\n#define __CURRENT_TYPE__ {classInfo.FullName}\n")
                     .Append($"\n#undef __CURRENT_TYPE_NAME_STRING__\n#define __CURRENT_TYPE_NAME_STRING__ {classInfo.FullName.Replace("::", "_")}\n")
-                    .Append($"\n\t__GEN_REFLECTION_GET_NAME_IMPLEMENTATION({classInfo.name});\n\n")
-                    .Append($"\t__GEN_REFLECTION_CREATE_INSTANCE_FUNCTION;\n\n")
-                    .Append($"\t__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_BEGIN({namespaceValue})\n");
+                    .Append($"\n\t__GEN_REFLECTION_GET_NAME_IMPLEMENTATION({classInfo.name});\n\n");
+
+                Launch<ProxyMethodGenerator, ClassInfo>(Builder, classInfo);
+
+                Builder.Append($"\t__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_BEGIN({namespaceValue})\n");
 
                 Launch<AttributeGenerator, MemberInfo>(Builder, classInfo);
                 Launch<ParentInfoGenerator, ClassInfo>(Builder, classInfo);

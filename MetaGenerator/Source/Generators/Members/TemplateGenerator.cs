@@ -5,11 +5,9 @@ namespace MetaGenerator
     {
         public override void Run()
         {
-            string wrapper = Context.HasNamespace ? "__GEN_REFLECTION_NAMESPACE_WRAPPER" : "__GEN_REFLECTION_NO_NAMESPACE_WRAPPER";
             string converter = Context.HasNamespace ? "__GEN_REFLECTION_NAMESPACE_CONVERTER" : "__GEN_REFLECTION_NULL_NAMESPACE_CONVERTER";
-            string typeOf = Context.templateParameters + ' ' + Context.TypeOf;
 
-            Builder.Append($"__GEN_REFLECTION_TEMPLATE_TYPE_FORWARD_DECLARATION_BEGIN(__GEN_ARG({typeOf}), {Context.name}, {wrapper}, {converter}, {Context.namespaceName})\n");
+            Builder.Append($"__GEN_REFLECTION_TEMPLATE_TYPE_FORWARD_DECLARATION_BEGIN({Context.name}, {converter}, {Context.namespaceName})\n");
 
             Launch<AttributeGenerator, MemberInfo>(Builder, Context);
             Launch<ParentInfoGenerator, ClassInfo>(Builder, Context);

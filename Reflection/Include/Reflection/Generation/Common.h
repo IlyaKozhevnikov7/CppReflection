@@ -49,6 +49,8 @@ namespace Reflection::Generation
 	template<typename T, typename... TArgs>
 	struct ProxyCtor<T, void(TArgs...)>
 	{
+		static_assert(std::is_abstract_v<T> == false, "An abstract type cannot have a reflectable constructor");
+
 		static void Func(void* ptr, TArgs... args)
 		{
 			new(ptr) T(std::forward<TArgs>(args)...);

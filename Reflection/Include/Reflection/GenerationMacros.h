@@ -161,12 +161,12 @@
 #define	__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_NO_METHOD_INFO { },
 
 #define	__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_METHOD_INFO_BEGIN {
-#define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_METHOD_INFO(Name, Id, Flags) __GEN_TO_STRING(Name), &__CURRENT_TYPE__::Name, {}, (const __CURRENT_TYPE__*)nullptr, decltype(&__CURRENT_TYPE__::__GEN_REFLECTION_TYPE_META::_##Id)(nullptr), Reflection::MethodFlags(Flags) },
+#define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_METHOD_INFO(Name, Id, Flags) __GEN_TO_STRING(Name), &Generation::ProxyInvoker<__CURRENT_TYPE__>::Invoke_m##Id, {}, (const __CURRENT_TYPE__*)nullptr, decltype(&__CURRENT_TYPE__::__GEN_REFLECTION_TYPE_META::m##Id)(nullptr), Reflection::MethodFlags(Flags) },
 
 #define	__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_METHOD_INFOS_END },
 
 /*
-*  ---------- Constructore ----------
+*  ---------- Constructors ----------
 */
 #define	__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_NO_CONSTRUCTOR_INFO { },
 
@@ -182,14 +182,13 @@
 #define __GEN_REFLECTION_NAMESPACE_CONVERTER(...) __GEN_TO_STRING(__VA_ARGS__)
 #define __GEN_REFLECTION_NULL_NAMESPACE_CONVERTER(...) nullptr
 
-#define __GEN_REFLECTION_TEMPLATE_TYPE_FORWARD_DECLARATION_BEGIN(typeOf, T, Wrapper, Converter, Namespace) \
-	Wrapper(typeOf, T, Namespace); \
+#define __GEN_REFLECTION_TEMPLATE_TYPE_FORWARD_DECLARATION_BEGIN(T, Converter, Namespace) \
     namespace Reflection { \
-    template<typename ...TArgs> struct TypeOf<__GEN_COMBINE_NAMESPACE(Namespace, T)<TArgs...>> final \
+	template<typename ...TArgs> inline constexpr bool IsReflectable<__CURRENT_TYPE__> = true; \
+    template<typename ...TArgs> struct TypeOf<__CURRENT_TYPE__> final \
     { \
         constexpr static uint32_t NameLength = sizeof(__GEN_TO_STRING(T)) + 1 + Reflection::Generation::FullNameLength<TArgs...>::value + (sizeof...(TArgs) < 2 ? 0 : (sizeof...(TArgs) - 1) * 2); \
     private: \
-        using __CURRENT_TYPE__ = __GEN_COMBINE_NAMESPACE(Namespace, T)<TArgs...>; \
         constexpr static const char* NamespaceName = Converter(Namespace); \
         struct Name final : public Reflection::Generation::GenericTypeName<NameLength, TArgs...> \
         { \
@@ -224,7 +223,7 @@
 #define __GEN_REFLECTION_TEMPLATE_MEMBER_NAME_FUNCTION(ExportMacro, MemberId) ExportMacro extern const char* __GEN_COMBINE_NAMES(GetTemplateMemberName_, __GEN_REFLECTION_TEMPLATE_MEMBER_0)##_##MemberId();
 
 #define __GEN_REFLECTION_TEMPLATE_GET_TYPE_IMPLEMENTATION_FIELD_INFO(MemberId) Generation::__GEN_COMBINE_NAMES(GetTemplateMemberName_, __GEN_REFLECTION_TEMPLATE_MEMBER_0)##_##MemberId(), Reflection::Generation::GetOffsetOfField(&__CURRENT_TYPE__::__GEN_REFLECTION_TEMPLATE_MEMBER_##MemberId), Reflection::Generation::IsStaticField(&__CURRENT_TYPE__::__GEN_REFLECTION_TEMPLATE_MEMBER_##MemberId), (decltype(__CURRENT_TYPE__::__GEN_REFLECTION_TEMPLATE_MEMBER_##MemberId)*)(nullptr) },
-#define __GEN_REFLECTION_TEMPLATE_GET_TYPE_IMPLEMENTATION_METHOD_INFO(MemberId, Id, Flags) Generation::__GEN_COMBINE_NAMES(GetTemplateMemberName_, __GEN_REFLECTION_TEMPLATE_MEMBER_0)##_##MemberId(), &__CURRENT_TYPE__::__GEN_REFLECTION_TEMPLATE_MEMBER_##MemberId, {}, (const __CURRENT_TYPE__*)nullptr, decltype(&__CURRENT_TYPE__::__GEN_REFLECTION_TYPE_META::_##Id)(nullptr), Reflection::MethodFlags(Flags) },
+#define __GEN_REFLECTION_TEMPLATE_GET_TYPE_IMPLEMENTATION_METHOD_INFO(MemberId, Id, Flags) Generation::__GEN_COMBINE_NAMES(GetTemplateMemberName_, __GEN_REFLECTION_TEMPLATE_MEMBER_0)##_##MemberId(), &Generation::ProxyInvoker<__CURRENT_TYPE__>::Invoke_m##Id, {}, (const __CURRENT_TYPE__*)nullptr, decltype(&__CURRENT_TYPE__::__GEN_REFLECTION_TYPE_META::m##Id)(nullptr), Reflection::MethodFlags(Flags) },
 
 /*
 *  ========== Enum generation ==========
@@ -250,6 +249,77 @@
 	} \
 
 /*
+*	========== Proxy Invoker generation ==========
+*/
+
+#define __GEN_PROXY_INVOKER_BEGIN \
+namespace Generation  \
+{ \
+	template<> \
+	struct ProxyInvoker<__CURRENT_TYPE__> \
+	{ \
+
+#define __GEN_TEMPLATE_PROXY_INVOKER_BEGIN \
+	namespace Reflection::Generation  \
+	{ \
+		template<typename ...TArgs> \
+		struct ProxyInvoker<__CURRENT_TYPE__> \
+		{ \
+
+#define __GEN_PROXY_INVOKER_END }; }
+
+#define __GEN_PASS_ARGS Generation::PassArgs<Generation::TypeByIndex_t<Indices, _TArgs...>>(info->args, Generation::GetOffset<Indices, 0, _TArgs...>())...
+#define __GEN_PROXY_METHOD(Name, Id) \
+	template<typename TSignature, typename... _TArgs, size_t... Indices> \
+	static void InvokeInternal_m##Id(const InvokeInfo* info, std::tuple<_TArgs...>*, std::index_sequence<Indices...>) \
+	{ \
+		using Info = FunctionCoreInfo<TSignature>; \
+		using ReturnType = Info::ReturnType; \
+		if constexpr (std::is_member_function_pointer_v<TSignature>) \
+		{ \
+			if constexpr (std::is_void_v<ReturnType>) \
+			{ \
+				reinterpret_cast<__CURRENT_TYPE__*>(info->object)->Name(__GEN_PASS_ARGS); \
+			} \
+			else \
+			{ \
+				if constexpr (std::is_move_constructible_v<ReturnType>) \
+				{ \
+					new(info->returnData) ReturnType(std::move(reinterpret_cast<__CURRENT_TYPE__*>(info->object)->Name(__GEN_PASS_ARGS))); \
+				} \
+				else \
+				{ \
+					new(info->returnData) ReturnType(reinterpret_cast<__CURRENT_TYPE__*>(info->object)->Name(__GEN_PASS_ARGS)); \
+				} \
+			} \
+		} \
+		else \
+		{ \
+			if constexpr (std::is_void_v<ReturnType>) \
+			{ \
+				__CURRENT_TYPE__::Name(__GEN_PASS_ARGS); \
+			} \
+			else \
+			{ \
+				if constexpr (std::is_move_constructible_v<ReturnType>) \
+				{ \
+					new(info->returnData) ReturnType(std::move(__CURRENT_TYPE__::Name(__GEN_PASS_ARGS))); \
+				} \
+				else \
+				{ \
+					new(info->returnData) ReturnType(__CURRENT_TYPE__::Name(__GEN_PASS_ARGS)); \
+				} \
+			} \
+		} \
+	} \
+	static void Invoke_m##Id(const InvokeInfo* info) \
+	{ \
+		using Signature = decltype(&__CURRENT_TYPE__::__GEN_REFLECTION_TYPE_META::m##Id); \
+		using Args = FunctionCoreInfo<Signature>::Args; \
+		InvokeInternal_m##Id<Signature>(info, (Args*)nullptr, std::make_index_sequence<std::tuple_size_v<Args>>{}); \
+	} \
+
+/*
 *	========== Inline generation ==========
 */
 
@@ -259,6 +329,7 @@
 #define __GEN_REFLECTION_TYPE_INLINE_CORE(VirtualSpecifier) \
 	private: \
 		friend Reflection::TypeOf<__THIS_TYPE__>; \
+		friend Reflection::Generation::ProxyInvoker<__THIS_TYPE__>; \
 	public: \
 		VirtualSpecifier Reflection::TypePtr GetType() const \
 		{ \
@@ -269,7 +340,6 @@
 	private: \
 		struct __GEN_REFLECTION_TYPE_META final \
 		{ \
-			friend Reflection::TypeOf<__THIS_TYPE__>; \
 
 
 #define __GEN_REFLECTION_TYPE_INLINE_META_END };

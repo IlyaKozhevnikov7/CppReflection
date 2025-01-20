@@ -1,14 +1,155 @@
 #pragma once
 
-#include <type_traits>
+#include "Reflection/ParameterType.h"
 
 namespace Reflection
 {
+	class ArgumentsPacker
+	{
+	private:
+
+		int8_t* m_Pack;
+
+	private:
+
+		template<size_t Offset, typename TFirst, typename... TOther>
+		void Pack(TFirst f, TOther... args)
+		{
+			*(TFirst*)(m_Pack + Offset) = std::move(f);
+			
+			if constexpr (sizeof...(TOther) > 0)
+			{
+				return Pack<Offset + sizeof(TFirst), TOther...>(std::forward<TOther>(args)...);
+			}
+		}
+
+	public:
+
+		template<typename... TArgs>
+		ArgumentsPacker(int8_t* pack, TArgs... args) :
+			m_Pack(pack)
+		{
+			Pack<0, TArgs...>(std::forward<TArgs>(args)...);
+		}
+
+		template<typename T, typename... TArgs>
+		static constexpr size_t GetSize()
+		{
+			size_t size = sizeof(T);
+
+			if constexpr (sizeof...(TArgs) > 0)
+			{
+				size += GetSize<TArgs...>();
+			}
+
+			return size;
+		}
+	};
+
 	struct InvokeInfo
 	{
-		void* returnData	= nullptr;
-		void* args			= nullptr;
-		void* object		= nullptr;
+		void* returnData = nullptr;
+		const void* args = nullptr;
+		void* object = nullptr; // TODO: maybe remove and make that object was a args[0]
+	};
+
+	template<typename TSignature>
+	struct FunctionCoreInfo;
+
+	template<typename T, typename TReturn, typename... TArgs>
+	struct FunctionCoreInfo<TReturn(T::*)(TArgs...)>
+	{
+		constexpr static size_t ArgsCount = sizeof...(TArgs);
+		using ReturnType = TReturn;
+		using Args = std::tuple<TArgs...>;
+	};
+
+	template<typename TReturn, typename T, typename... TArgs>
+	struct FunctionCoreInfo<TReturn(T::*)(TArgs...) const>
+	{
+		constexpr static size_t ArgsCount = sizeof...(TArgs);
+		using ReturnType = TReturn;
+		using Args = std::tuple<TArgs...>;
+	};
+
+	template<typename TReturn, typename... TArgs>
+	struct FunctionCoreInfo<TReturn(*)(TArgs...)>
+	{
+		constexpr static size_t ArgsCount = sizeof...(TArgs);
+		using ReturnType = TReturn;
+		using Args = std::tuple<TArgs...>;
+	};
+
+	template<typename TSignature>
+	struct ParamsExcluder;
+
+	template<typename T, typename TReturn, typename... TArgs>
+	struct ParamsExcluder<TReturn(T::*)(TArgs...)>
+	{
+		static void Exclude(const ParameterType* params)
+		{
+			if constexpr (sizeof...(TArgs) > 0)
+			{
+				ParameterType::Excluder(params).Process<0, TArgs...>();
+			}
+		}
+	};
+
+	template<typename TReturn, typename T, typename... TArgs>
+	struct ParamsExcluder<TReturn(T::*)(TArgs...) const>
+	{
+		static void Exclude(const ParameterType* params)
+		{
+			if constexpr (sizeof...(TArgs) > 0)
+			{
+				ParameterType::Excluder(params).Process<0, TArgs...>();
+			}
+		}
+	};
+
+	template<typename TReturn, typename... TArgs>
+	struct ParamsExcluder<TReturn(*)(TArgs...)>
+	{
+		static void Exclude(const ParameterType* params)
+		{
+			if constexpr (sizeof...(TArgs) > 0)
+			{
+				ParameterType::Excluder(params).Process<0, TArgs...>();
+			}
+		}
+	};
+
+	template<typename... TArgs>
+	class ArgumentsPack
+	{
+	private:
+
+		int8_t m_Pack[ArgumentsPacker::GetSize<TArgs...>()];
+
+	public:
+
+		ArgumentsPack(TArgs... args)
+		{
+			ArgumentsPacker(m_Pack, std::forward<TArgs>(args)...);
+		}
+
+		const void* Get() const
+		{
+			return m_Pack;
+		}
+	};
+
+	template<>
+	class ArgumentsPack<>
+	{
+	public:
+
+		ArgumentsPack() = default;
+
+		const void* Get() const
+		{
+			return nullptr;
+		}
 	};
 
 	namespace Generation
@@ -53,7 +194,7 @@ namespace Reflection
 		using TypeByIndex_t = TypeByIndex<Index, TOther...>::Type;
 
 		template<typename T, typename TPtr = RefToPtr_t<T>>
-		static T PassArgs(const void* bytes, size_t offset) 
+		static T PassArgs(const void* bytes, size_t offset)
 		{
 			return (T)*(TPtr*)((int8_t*)bytes + offset);
 		}
@@ -80,127 +221,83 @@ namespace Reflection
 
 			return offset;
 		}
-		
-		/*
-		*	Static Invoke
-		*/
 
-		template<typename TSignature, typename TReturn, typename... TArgs, size_t... Indices>
-		static void StaticInvokeInternal(const InvokeInfo* info, size_t* handle, std::index_sequence<Indices...>)
-		{
-#define INVOKE (*(TSignature*)&handle)( \
-			PassArgs<TypeByIndex_t<Indices, TArgs...>>(info->args, GetOffset<Indices, 0, TArgs...>())...) \
-
-			if constexpr (std::is_void_v<TReturn>)
-			{
-				INVOKE;
-			}
-			else
-			{
-				*(TReturn*)info->returnData = INVOKE;
-			}
-
-#undef INVOKE
-		}
-
-		template<typename TSignature>
-		struct StaticProxyInvoke;
-
-		template<typename TReturn, typename... TArgs>
-		struct StaticProxyInvoke<TReturn(*)(TArgs...)>
-		{
-			static void Invoke(const InvokeInfo* info, size_t* handle)
-			{
-				using Signature = TReturn(*)(TArgs...);
-				StaticInvokeInternal<Signature, TReturn, TArgs...>(info, handle, std::index_sequence_for<TArgs...>{});
-			}
-		};
-
-		template<typename TSignature, typename T, typename TReturn, typename... TArgs, size_t... Indices>
-		static void InstanceInvokeInternal(const InvokeInfo* info, size_t* handle, std::index_sequence<Indices...>)
-		{
-#define INVOKE ((T*)info->object->*(*(TSignature*)&handle))( \
-			PassArgs<TypeByIndex_t<Indices, TArgs...>>(info->args, GetOffset<Indices, 0, TArgs...>())...) \
-
-			if constexpr (std::is_void_v<TReturn>)
-			{
-				INVOKE;
-			}
-			else
-			{
-				*(TReturn*)info->returnData = INVOKE;
-			}
-
-#undef INVOKE
-		}
-
-		/*
-		*	Instance Invoke
-		*/
-
-		template<typename T, typename TSignature>
-		struct InstanceProxyInvoke;
-
-		template<typename T, typename TReturn, typename... TArgs>
-		struct InstanceProxyInvoke<T, TReturn(T::*)(TArgs...)>
-		{
-			static void Invoke(const InvokeInfo* info, size_t* handle)
-			{
-				using Signature = TReturn(T::*)(TArgs...);
-				InstanceInvokeInternal<Signature, T, TReturn, TArgs...>(info, handle, std::index_sequence_for<TArgs...>{});			
-			}
-		};
-
-		template<typename T, typename TReturn, typename... TArgs>
-		struct InstanceProxyInvoke<T, TReturn(T::*)(TArgs...) const>
-		{
-			static void Invoke(const InvokeInfo* info, size_t* handle)
-			{
-				using Signature = TReturn(T::*)(TArgs...) const;
-				InstanceInvokeInternal<Signature, T, TReturn, TArgs...>(info, handle, std::index_sequence_for<TArgs...>{});
-			}
-		};
+		template<typename T>
+		struct ProxyInvoker;
 	}
 
 	namespace Internal
 	{
-		class ProxyInvoker
+		using ProxyInvokeSignature = void(*)(const InvokeInfo*);
+
+		class VoidInvoker
 		{
-		public:
-
-			using Handle = size_t*;
-			using ProxyInvokeSignature = void(*)(const InvokeInfo*, Handle);
-
 		private:
 
-			Handle m_Handle;
 			ProxyInvokeSignature m_Invoke;
+			const std::vector<ParameterType> m_Params;
 
 		public:
+
+			std::span<const ParameterType> GetParameterTypes() const
+			{
+				return m_Params;
+			}
+
+			template<size_t First, typename... TArgs>
+			bool CheckParameterTypes() const
+			{
+				if constexpr (sizeof...(TArgs) == 0)
+				{
+					return m_Params.size() == First;
+				}
+				else
+				{
+					return m_Params.size() - First == sizeof...(TArgs) && ParameterType::Comparator(m_Params.data() + First).Process<0, TArgs...>();
+				}
+			}
 
 			void Invoke(const InvokeInfo* info) const
 			{
-				m_Invoke(info, m_Handle);
+				m_Invoke(info);
 			}
 
-			template<typename TReturn, typename... TArgs>
-			ProxyInvoker(TReturn(*handle)(TArgs...)) :
-				m_Handle(*(size_t**)&handle),
-				m_Invoke(&Generation::StaticProxyInvoke<decltype(handle)>::Invoke)
+			template<typename TSignature>
+			VoidInvoker(ProxyInvokeSignature invoker, TSignature signature) :
+				m_Invoke(invoker),
+				m_Params(FunctionCoreInfo<TSignature>::ArgsCount)
+			{
+				ParamsExcluder<TSignature>::Exclude(m_Params.data());
+			}
+
+			VoidInvoker()
 			{
 			}
+		};
 
-			template<typename T, typename TReturn, typename... TArgs>
-			ProxyInvoker(TReturn(T::*handle)(TArgs...)) :
-				m_Handle(*(size_t**)&handle),
-				m_Invoke(&Generation::InstanceProxyInvoke<T, decltype(handle)>::Invoke)
+		class Invoker : public VoidInvoker
+		{
+		private:
+
+			const ParameterType m_ReturnType;
+
+		public:
+
+			ParameterType GetReturnType() const
 			{
+				return m_ReturnType;
 			}
 
-			template<typename T, typename TReturn, typename... TArgs>
-			ProxyInvoker(TReturn(T::*handle)(TArgs...) const) :
-				m_Handle(*(size_t**)&handle),
-				m_Invoke(&Generation::InstanceProxyInvoke<T, decltype(handle)>::Invoke)
+			template<typename T>
+			bool CheckReturnType() const
+			{
+				return m_ReturnType == ParameterType(ParameterType::Initializer<T>{});
+			}
+
+			template<typename TSignature>
+			Invoker(ProxyInvokeSignature invoker, TSignature signature) :
+				VoidInvoker(invoker, signature),
+				m_ReturnType(ParameterType::Initializer<FunctionCoreInfo<TSignature>::template ReturnType>{})
 			{
 			}
 		};

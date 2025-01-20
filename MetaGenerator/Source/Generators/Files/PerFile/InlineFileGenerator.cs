@@ -29,7 +29,7 @@ namespace MetaGenerator
                 {
                     var declarationInfo = Context.methods[i].declarationInfo;
                     string ending = Context.methods[i].virtualType == MethodVirtualType.PureVirtual ? " = 0;" : ";";
-                    Builder.Append($"\t{declarationInfo.prefix} _{i}{declarationInfo.parameters}{declarationInfo.suffix}{ending}\n");
+                    Builder.Append($"\t{declarationInfo.prefix} m{i}{declarationInfo.parameters}{declarationInfo.suffix}{ending}\n");
                 }
 
                 Builder.Append($"__GEN_REFLECTION_TYPE_INLINE_META_END\n");

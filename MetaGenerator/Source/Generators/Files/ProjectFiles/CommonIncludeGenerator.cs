@@ -64,6 +64,7 @@ namespace MetaGenerator
                 int memberId = 0;
 
                 Builder.Append("\nnamespace Reflection::Generation\n{\n")
+                    .Append($"\t#define __CURRENT_TYPE__ {classInfo.FullName}<TArgs...>\n")
                     .Append($"\t#define __GEN_REFLECTION_TEMPLATE_MEMBER_{memberId++} {classFullName}\n");
 
                 for (int i = 0; i < classInfo.fields.Length; i++)
@@ -72,16 +73,23 @@ namespace MetaGenerator
                 for (int i = 0; i < classInfo.methods.Length; i++)
                     AddendTemplateMemberName(Builder, memberId++, classInfo.methods[i].name);
 
-
                 for (int i = 0; i < memberId; i++)
                     Builder.Append($"\t__GEN_REFLECTION_TEMPLATE_MEMBER_NAME_FUNCTION({ProgramContext.InternalDllExportMacro}, {i})\n");
 
                 Builder.Append("}\n");
 
+                string wrapper = classInfo.HasNamespace ? "__GEN_REFLECTION_NAMESPACE_WRAPPER" : "__GEN_REFLECTION_NO_NAMESPACE_WRAPPER";
+                string typeOf = classInfo.templateParameters + ' ' + classInfo.TypeOf;
+
+                Builder.Append($"{wrapper}(__GEN_ARG({typeOf}), {classInfo.name}, {classInfo.namespaceName});\n");
+
+                Launch<ProxyMethodGenerator, ClassInfo>(Builder, classInfo);
                 Launch<TemplateGenerator, ClassInfo>(Builder, classInfo);
 
                 for (int i = 0; i < memberId; i++)
                     Builder.Append($"#undef __GEN_REFLECTION_TEMPLATE_MEMBER_{i}\n");
+
+                Builder.Append($"#undef __CURRENT_TYPE__\n");
             }
         }
 

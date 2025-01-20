@@ -48,4 +48,24 @@ namespace MetaGenerator
             }
         }
     }
+
+    public class ProxyMethodGenerator : SecondaryGenerator<ClassInfo>
+    {
+        public override void Run()
+        {
+            if (Context.HasMethods == false)
+                return;
+
+            string begin = Context.IsTemplate ? "__GEN_TEMPLATE_PROXY_INVOKER_BEGIN" : "__GEN_PROXY_INVOKER_BEGIN";
+            Builder.AppendLine($"\t{begin}");
+
+            for (int i = 0; i < Context.methods.Length; i++)
+            {
+                var info = Context.methods[i];
+                Builder.AppendLine($"\t\t__GEN_PROXY_METHOD({info.name}, {i})");
+            }
+
+            Builder.AppendLine("\t__GEN_PROXY_INVOKER_END\n");
+        }
+    }
 }
