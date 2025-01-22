@@ -9,7 +9,7 @@ namespace MetaGenerator
 
             Builder.Append($"__GEN_REFLECTION_TEMPLATE_TYPE_FORWARD_DECLARATION_BEGIN({Context.name}, {converter}, {Context.namespaceName})\n");
 
-            Launch<AttributeGenerator, MemberInfo>(Builder, Context);
+            Launch<AttributeGenerator, MemberInfoBase>(Builder, Context);
             Launch<ParentInfoGenerator, ClassInfo>(Builder, Context);
             Launch<TemplateFieldInfoGenerator, ClassInfo>(Builder, Context);
             Launch<TemplateMethodInfoGenerator, ClassInfo>(Builder, Context);

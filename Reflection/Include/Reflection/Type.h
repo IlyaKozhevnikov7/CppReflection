@@ -209,7 +209,7 @@ namespace Reflection
 			m_Namespace(namespaceName),
 			m_Flags(ExcludeFlags<T>::Flags),
 			m_GetActualType(nullptr),
-			m_LifetimeControl({ { {}, &Generaion::EnumProxyCtor<T>::Func }}, nullptr),
+			m_LifetimeControl({ { {}, &Generation::EnumProxyCtor<T>::Invoke, (void(*)())(nullptr) }}, nullptr),
 			m_InternalInfo((T*)nullptr)
 		{
 		}

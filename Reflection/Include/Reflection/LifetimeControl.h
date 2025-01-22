@@ -1,87 +1,61 @@
 #pragma once
 
 #include "Reflection/MemberInfo.h"
-#include "Reflection/ParameterType.h"
+#include "Reflection/Internal/ProxyInvoker.h"
 
 namespace Reflection
 {
 	class ConstructorInfo : public MemberInfoBase
 	{
-	public:
-
-		using Handle = size_t*;
-
 	private:
 
-		const Handle						m_Address;
-		const std::vector<ParameterType>	m_Parameters;
+		Internal::VoidInvoker m_Invoker;
 
 	public:
-
-		size_t GetParameterCount() const
-		{
-			return m_Parameters.size();
-		}
 
 		std::span<const ParameterType> GetParameters() const
 		{
-			return m_Parameters;
+			return m_Invoker.GetParameterTypes();
 		}
 
 		template<typename ...TArgs>
-		bool CheckSiganture() const
+		bool CheckParameters() const
 		{
-			if constexpr (sizeof...(TArgs) == 0)
-			{
-				return m_Parameters.empty();
-			}
-			else
-			{
-				return m_Parameters.size() == sizeof...(TArgs) && ParameterType::Comparator(m_Parameters.data()).Process<0, TArgs...>();
-			}
+			return m_Invoker.CheckParameterTypes<TArgs...>();
 		}
-
-		template<typename ...TArgs>
-		void Construct(void* ptr, TArgs... args) const
-		{
-			assert((CheckSiganture<TArgs...>()) && "Constructor signature mismatch");
-
-			using Signature = void(*)(void*, TArgs...);
-			((Signature)m_Address)(ptr, std::forward<TArgs>(args)...);
-		}
-
-	public:
 
 		template<typename... TArgs>
-		ConstructorInfo(std::initializer_list<const Attribute*> attributes, void(*address)(void*, TArgs...)) :
-			MemberInfoBase(attributes),
-			m_Address(*reinterpret_cast<Handle*>(&address)),
-			m_Parameters(sizeof...(TArgs))
+		void Construct(void* ptr, TArgs... args) const
 		{
-			if constexpr (sizeof...(TArgs) > 0)
+			assert((CheckParameters<TArgs...>()) && "Constructor signature mismatch.");
+			ArgumentsPack<TArgs...> pack(std::forward<TArgs>(args)...);
+
+			const InvokeInfo info =
 			{
-				ParameterType::Excluder(m_Parameters.data()).Process<0, TArgs...>();
-			}
+				.result = ptr,
+				.args = pack.Get()
+			};
+
+			m_Invoker.Invoke(&info);
 		}
 
-
-	private:
-
-		template<typename T, typename ...TOther>
-		bool CheckParameterTypes(uint32_t i = 0) const
+		void ConstructExplicit(const InvokeInfo* info) const
 		{
-			if ((m_Parameters[i] == ParameterType(ParameterType::Initializer<T>{})) == false)
-				return false;
+			assert(info->result && "The result must point to the object's memory.");
+			m_Invoker.Invoke(info);
+		}
+			
+	public:
 
-			if constexpr (sizeof...(TOther) > 0)
-			{
-				// TODO: remake with template index
-				return CheckParameterTypes<TOther...>(i + 1);
-			}
+		template<typename TSignature>
+		ConstructorInfo(std::initializer_list<const Attribute*> attributes, Internal::ProxyInvokeSignature invoker, TSignature signature) :
+			MemberInfoBase(attributes),
+			m_Invoker(invoker, signature)
+		{
 		}
 	};
 
-	class REFLECTION_API LifetimeControl
+	class LifetimeControl
 	{
 	public:
 
@@ -108,7 +82,7 @@ namespace Reflection
 		const ConstructorInfo* GetConstructor() const
 		{
 			for (auto& info : m_ConstructorInfos)
-				if (info.CheckSiganture<TArgs...>())
+				if (info.CheckParameters<TArgs...>())
 					return &info;
 
 			return nullptr;
@@ -134,15 +108,44 @@ namespace Reflection
 		}
 	};
 
-	namespace Generaion
+	namespace Generation
 	{
+		struct ProxyCtor
+		{
+			template<typename T, typename... _TArgs, size_t... Indices>
+			static void InvokeInternal(const InvokeInfo* info, std::tuple<_TArgs...>*, std::index_sequence<Indices...>)
+			{
+				const void* args = info->args;
+				new(info->result) T(__GEN_PASS_ARGS);
+			}
+
+			template<typename T, typename TSignature>
+			static void Invoke(const InvokeInfo* info)
+			{
+				using Args = FunctionCoreInfo<TSignature>::Args;
+				InvokeInternal<T>(info, (Args*)nullptr, std::make_index_sequence<std::tuple_size_v<Args>>{});
+			}
+		};
+
+		template<typename T>
+		struct ProxyDestructor
+		{
+			static void Invoke(void* ptr)
+			{
+				if constexpr (std::is_trivially_destructible_v<T> == false)
+				{
+					reinterpret_cast<T*>(ptr)->~T();
+				}
+			}
+		};
+
 		template<size_t Size>
 		struct EnumProxyCtorImpl {};
 
-		template<> struct REFLECTION_API EnumProxyCtorImpl<1> { static void Func(void*); };
-		template<> struct REFLECTION_API EnumProxyCtorImpl<2> { static void Func(void*); };
-		template<> struct REFLECTION_API EnumProxyCtorImpl<4> { static void Func(void*); };
-		template<> struct REFLECTION_API EnumProxyCtorImpl<8> { static void Func(void*); };
+		template<> struct REFLECTION_API EnumProxyCtorImpl<1> { static void Invoke(const InvokeInfo* info); };
+		template<> struct REFLECTION_API EnumProxyCtorImpl<2> { static void Invoke(const InvokeInfo* info); };
+		template<> struct REFLECTION_API EnumProxyCtorImpl<4> { static void Invoke(const InvokeInfo* info); };
+		template<> struct REFLECTION_API EnumProxyCtorImpl<8> { static void Invoke(const InvokeInfo* info); };
 
 		template<typename TEnum>
 		struct EnumProxyCtor : EnumProxyCtorImpl<sizeof(TEnum)> {};

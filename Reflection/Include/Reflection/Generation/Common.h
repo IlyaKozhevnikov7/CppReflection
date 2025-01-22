@@ -40,29 +40,3 @@ namespace Reflection::Generation
 }
 
 #include "Reflection/Generation/GenericTypeName.h"
-
-namespace Reflection::Generation
-{
-	template<typename T, typename TSignature>
-	struct ProxyCtor;
-
-	template<typename T, typename... TArgs>
-	struct ProxyCtor<T, void(TArgs...)>
-	{
-		static_assert(std::is_abstract_v<T> == false, "An abstract type cannot have a reflectable constructor");
-
-		static void Func(void* ptr, TArgs... args)
-		{
-			new(ptr) T(std::forward<TArgs>(args)...);
-		}
-	};
-
-	template<typename T>
-	struct ProxyDestructor
-	{
-		static void Func(void* ptr)
-		{
-			((T*)ptr)->~T();
-		}
-	};
-}

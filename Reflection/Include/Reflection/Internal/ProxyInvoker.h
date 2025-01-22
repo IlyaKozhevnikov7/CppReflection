@@ -48,9 +48,8 @@ namespace Reflection
 
 	struct InvokeInfo
 	{
-		void* returnData = nullptr;
-		const void* args = nullptr;
-		void* object = nullptr; // TODO: maybe remove and make that object was a args[0]
+		void* result = nullptr;
+		void* args = nullptr;
 	};
 
 	template<typename TSignature>
@@ -133,7 +132,7 @@ namespace Reflection
 			ArgumentsPacker(m_Pack, std::forward<TArgs>(args)...);
 		}
 
-		const void* Get() const
+		void* Get()
 		{
 			return m_Pack;
 		}
@@ -146,7 +145,35 @@ namespace Reflection
 
 		ArgumentsPack() = default;
 
-		const void* Get() const
+		constexpr void* Get() const
+		{
+			return nullptr;
+		}
+	};
+
+	template<typename T>
+	class InvokeResult
+	{
+	private:
+
+		int8_t m_Buffer[sizeof(T)];
+
+	public:
+
+		void* Get()
+		{
+			return m_Buffer;
+		}
+	};
+
+	template<>
+	class InvokeResult<void>
+	{
+	public:
+
+		InvokeResult() = default;
+
+		constexpr void* Get() const
 		{
 			return nullptr;
 		}
@@ -204,7 +231,7 @@ namespace Reflection
 		{
 		}
 
-		template<size_t Till, size_t I, typename T, typename... TArgs>
+		template<size_t Till, size_t I, typename T, typename... TOther>
 		constexpr size_t GetOffset()
 		{
 			if constexpr (Till == I)
@@ -214,9 +241,9 @@ namespace Reflection
 
 			size_t offset = sizeof(T);
 
-			if constexpr (sizeof...(TArgs) > 0)
+			if constexpr (sizeof...(TOther) > 0)
 			{
-				offset += GetOffset<Till, I + 1, TArgs...>();
+				offset += GetOffset<Till, I + 1, TOther...>();
 			}
 
 			return offset;
@@ -244,16 +271,16 @@ namespace Reflection
 				return m_Params;
 			}
 
-			template<size_t First, typename... TArgs>
+			template<typename... TArgs>
 			bool CheckParameterTypes() const
 			{
 				if constexpr (sizeof...(TArgs) == 0)
 				{
-					return m_Params.size() == First;
+					return m_Params.size() == 0;
 				}
 				else
 				{
-					return m_Params.size() - First == sizeof...(TArgs) && ParameterType::Comparator(m_Params.data() + First).Process<0, TArgs...>();
+					return m_Params.size() == sizeof...(TArgs) && ParameterType::Comparator(m_Params.data()).Process<0, TArgs...>();
 				}
 			}
 
@@ -268,10 +295,6 @@ namespace Reflection
 				m_Params(FunctionCoreInfo<TSignature>::ArgsCount)
 			{
 				ParamsExcluder<TSignature>::Exclude(m_Params.data());
-			}
-
-			VoidInvoker()
-			{
 			}
 		};
 

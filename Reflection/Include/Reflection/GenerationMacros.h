@@ -171,9 +171,9 @@
 #define	__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_NO_CONSTRUCTOR_INFO { },
 
 #define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_CONSTRUCTORS_BEGIN {{
-#define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_CONSTRUCTOR_INFO(Id) &Generation::ProxyCtor<__CURRENT_TYPE__, decltype(__CURRENT_TYPE__::__GEN_REFLECTION_TYPE_META::c##Id)>::Func },
+#define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_CONSTRUCTOR_INFO(Id) &Generation::ProxyCtor::Invoke<__CURRENT_TYPE__, decltype(&__CURRENT_TYPE__::__GEN_REFLECTION_TYPE_META::c##Id)>, decltype(&__CURRENT_TYPE__::__GEN_REFLECTION_TYPE_META::c##Id)(nullptr) },
 
-#define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_CONSTRUCTORS_END }, &Generation::ProxyDestructor<__CURRENT_TYPE__>::Func },
+#define __GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_CONSTRUCTORS_END }, &Generation::ProxyDestructor<__CURRENT_TYPE__>::Invoke },
 
 /*
 *  ========== Template generation ==========
@@ -268,28 +268,31 @@ namespace Generation  \
 
 #define __GEN_PROXY_INVOKER_END }; }
 
-#define __GEN_PASS_ARGS Generation::PassArgs<Generation::TypeByIndex_t<Indices, _TArgs...>>(info->args, Generation::GetOffset<Indices, 0, _TArgs...>())...
+#define __GEN_PASS_ARGS Generation::PassArgs<Generation::TypeByIndex_t<Indices, _TArgs...>>(args, Generation::GetOffset<Indices, 0, _TArgs...>())...
 #define __GEN_PROXY_METHOD(Name, Id) \
 	template<typename TSignature, typename... _TArgs, size_t... Indices> \
 	static void InvokeInternal_m##Id(const InvokeInfo* info, std::tuple<_TArgs...>*, std::index_sequence<Indices...>) \
 	{ \
 		using Info = FunctionCoreInfo<TSignature>; \
 		using ReturnType = Info::ReturnType; \
+		void* args = info->args; \
 		if constexpr (std::is_member_function_pointer_v<TSignature>) \
 		{ \
+			auto obj = *reinterpret_cast<__CURRENT_TYPE__**>(args); \
+			args = reinterpret_cast<int8_t*>(args) + sizeof(size_t); \
 			if constexpr (std::is_void_v<ReturnType>) \
 			{ \
-				reinterpret_cast<__CURRENT_TYPE__*>(info->object)->Name(__GEN_PASS_ARGS); \
+				reinterpret_cast<__CURRENT_TYPE__*>(obj)->Name(__GEN_PASS_ARGS); \
 			} \
 			else \
 			{ \
 				if constexpr (std::is_move_constructible_v<ReturnType>) \
 				{ \
-					new(info->returnData) ReturnType(std::move(reinterpret_cast<__CURRENT_TYPE__*>(info->object)->Name(__GEN_PASS_ARGS))); \
+					new(info->result) ReturnType(std::move(obj->Name(__GEN_PASS_ARGS))); \
 				} \
 				else \
 				{ \
-					new(info->returnData) ReturnType(reinterpret_cast<__CURRENT_TYPE__*>(info->object)->Name(__GEN_PASS_ARGS)); \
+					new(info->result) ReturnType(obj->Name(__GEN_PASS_ARGS)); \
 				} \
 			} \
 		} \
@@ -303,11 +306,11 @@ namespace Generation  \
 			{ \
 				if constexpr (std::is_move_constructible_v<ReturnType>) \
 				{ \
-					new(info->returnData) ReturnType(std::move(__CURRENT_TYPE__::Name(__GEN_PASS_ARGS))); \
+					new(info->result) ReturnType(std::move(__CURRENT_TYPE__::Name(__GEN_PASS_ARGS))); \
 				} \
 				else \
 				{ \
-					new(info->returnData) ReturnType(__CURRENT_TYPE__::Name(__GEN_PASS_ARGS)); \
+					new(info->result) ReturnType(__CURRENT_TYPE__::Name(__GEN_PASS_ARGS)); \
 				} \
 			} \
 		} \
@@ -329,6 +332,7 @@ namespace Generation  \
 #define __GEN_REFLECTION_TYPE_INLINE_CORE(VirtualSpecifier) \
 	private: \
 		friend Reflection::TypeOf<__THIS_TYPE__>; \
+		friend Reflection::Generation::ProxyCtor; \
 		friend Reflection::Generation::ProxyInvoker<__THIS_TYPE__>; \
 	public: \
 		VirtualSpecifier Reflection::TypePtr GetType() const \

@@ -60,25 +60,25 @@ namespace Reflection
 	private:
 	
 		template<typename T, ParameterFlag Flag>
-		struct FlagConditional;
+		struct HasFlag;
 	
 		template<typename T>
-		struct FlagConditional<T, ParameterFlag::Const> : std::bool_constant<std::is_const_v<T>> {};
+		struct HasFlag<T, ParameterFlag::Const> : std::bool_constant<std::is_const_v<T>> {};
 	
 		template<typename T>
-		struct FlagConditional<T, ParameterFlag::Pointer> : std::bool_constant<std::is_pointer_v<T>> {};
+		struct HasFlag<T, ParameterFlag::Pointer> : std::bool_constant<std::is_pointer_v<T>> {};
 	
 		template<typename T>
-		struct FlagConditional<T, ParameterFlag::PointerToPointer> : std::bool_constant<std::is_pointer_v<std::remove_pointer_t<T>>> {};
+		struct HasFlag<T, ParameterFlag::PointerToPointer> : std::bool_constant<std::is_pointer_v<std::remove_pointer_t<T>>> {};
 	
 		template<typename T>
-		struct FlagConditional<T, ParameterFlag::Reference> : std::bool_constant<std::is_reference_v<T>> {};
+		struct HasFlag<T, ParameterFlag::Reference> : std::bool_constant<std::is_reference_v<T>> {};
 	
 		template<typename T>
 		struct ExcludeFlags
 		{
 			template<ParameterFlag Flag>
-			constexpr static BitMask<ParameterFlag> FLAG = FlagConditional<T, Flag>::value ? Flag : ParameterFlag(0);
+			constexpr static BitMask<ParameterFlag> FLAG = HasFlag<T, Flag>::value ? Flag : ParameterFlag(0);
 			constexpr static BitMask<ParameterFlag> Flags = FLAG<ParameterFlag::Const> | FLAG<ParameterFlag::Pointer> | FLAG<ParameterFlag::PointerToPointer> | FLAG<ParameterFlag::Reference>;
 		};
 	

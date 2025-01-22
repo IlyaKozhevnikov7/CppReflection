@@ -1,24 +1,24 @@
 #include "LifetimeControl.h"
 
-namespace Reflection::Generaion
+namespace Reflection::Generation
 {
-	void EnumProxyCtorImpl<1>::Func(void* ptr)
+	void EnumProxyCtorImpl<1>::Invoke(const InvokeInfo* info)
 	{
-		memset(ptr, 0, 1);
+		memset(info->result, 0, 1);
 	}
 
-	void EnumProxyCtorImpl<2>::Func(void* ptr)
+	void EnumProxyCtorImpl<2>::Invoke(const InvokeInfo* info)
 	{
-		memset(ptr, 0, 2);
+		memset(info->result, 0, 2);
 	}
-	
-	void EnumProxyCtorImpl<4>::Func(void* ptr)
+
+	void EnumProxyCtorImpl<4>::Invoke(const InvokeInfo* info)
 	{
-		memset(ptr, 0, 4);
+		memset(info->result, 0, 4);
 	}
-	
-	void EnumProxyCtorImpl<8>::Func(void* ptr)
+
+	void EnumProxyCtorImpl<8>::Invoke(const InvokeInfo* info)
 	{
-		memset(ptr, 0, 8);
+		memset(info->result, 0, 8);
 	}
 }

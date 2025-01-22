@@ -25,7 +25,7 @@ namespace MetaGenerator
         {
             foreach (var field in Context.fields)
             {
-                Launch<AttributeGenerator, MemberInfo>(Builder, field);
+                Launch<AttributeGenerator, MemberInfoBase>(Builder, field);
                 Builder.AppendLine($"\t\t\t__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_FIELD_INFO({field.name})");
             }
         }
@@ -37,7 +37,7 @@ namespace MetaGenerator
         {
             for (int i = 0; i < Context.fields.Length; i++)
             {
-                Launch<AttributeGenerator, MemberInfo>(Builder, Context.fields[i]);
+                Launch<AttributeGenerator, MemberInfoBase>(Builder, Context.fields[i]);
                 Builder.AppendLine($"\t\t\t__GEN_REFLECTION_TEMPLATE_GET_TYPE_IMPLEMENTATION_FIELD_INFO({i + 1})");
             }
         }

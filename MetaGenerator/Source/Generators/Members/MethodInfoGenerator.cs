@@ -27,7 +27,7 @@ namespace MetaGenerator
             {
                 var info = Context.methods[i];
 
-                Launch<AttributeGenerator, MemberInfo>(Builder, info);
+                Launch<AttributeGenerator, MemberInfoBase>(Builder, info);
                 Builder.AppendLine($"\t\t\t__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_METHOD_INFO({info.name}, {i}, {(int)info.virtualType})");
             }
         }
@@ -43,7 +43,7 @@ namespace MetaGenerator
             {
                 var info = Context.methods[i];
 
-                Launch<AttributeGenerator, MemberInfo>(Builder, info);
+                Launch<AttributeGenerator, MemberInfoBase>(Builder, info);
                 Builder.AppendLine($"\t\t\t__GEN_REFLECTION_TEMPLATE_GET_TYPE_IMPLEMENTATION_METHOD_INFO({i + memberIdOffset}, {i}, {(int)info.virtualType})");
             }
         }

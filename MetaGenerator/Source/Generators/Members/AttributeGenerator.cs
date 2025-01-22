@@ -1,7 +1,7 @@
 ﻿
 namespace MetaGenerator
 {
-    internal class AttributeGenerator : SecondaryGenerator<MemberInfo>
+    internal class AttributeGenerator : SecondaryGenerator<MemberInfoBase>
     {
         public override void Run()
         {

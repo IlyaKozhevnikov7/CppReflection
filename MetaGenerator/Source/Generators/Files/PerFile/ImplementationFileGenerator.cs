@@ -55,7 +55,7 @@ namespace MetaGenerator
 
                 Builder.Append($"\t__GEN_REFLECTION_GET_TYPE_IMPLEMENTATION_BEGIN({namespaceValue})\n");
 
-                Launch<AttributeGenerator, MemberInfo>(Builder, classInfo);
+                Launch<AttributeGenerator, MemberInfoBase>(Builder, classInfo);
                 Launch<ParentInfoGenerator, ClassInfo>(Builder, classInfo);
                 Launch<FieldInfoGenerator, ClassInfo>(Builder, classInfo);
                 Launch<MethodInfoGenerator, ClassInfo>(Builder, classInfo);
