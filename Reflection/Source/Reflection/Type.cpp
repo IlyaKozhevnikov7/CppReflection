@@ -26,7 +26,7 @@ namespace Reflection
 		return nullptr;
 	}
 
-	FieldRef Type::GetFieldRef(const char* name) const
+	FieldPtr Type::GetFieldPtr(const char* name) const
 	{
 		if (IsEnum())
 			return {};
@@ -40,10 +40,10 @@ namespace Reflection
 			if (parent.type == nullptr)
 				continue;
 
-			const auto ref = parent.type->GetFieldRef(name);
+			const auto ptr = parent.type->GetFieldPtr(name);
 
-			if (ref.IsValid())
-				return { ref.GetInfo(), ref.GetOffset() + parent.offset };
+			if (ptr.IsValid())
+				return { ptr.GetInfo(), ptr.GetOffset() + parent.offset };
 		}
 
 		return {};

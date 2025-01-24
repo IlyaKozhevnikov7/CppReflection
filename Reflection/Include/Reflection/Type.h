@@ -132,7 +132,7 @@ namespace Reflection
 
 		const FieldInfo* GetField(const char* name) const;
 
-		FieldRef GetFieldRef(const char* name) const;
+		FieldPtr GetFieldPtr(const char* name) const;
 
 		const MethodInfo* GetMethod(const char* name) const;
 

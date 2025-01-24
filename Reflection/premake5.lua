@@ -23,8 +23,6 @@ project "CppReflection"
 		"REFLECTION_DLL_EXPORT",
 	}
 
-	---- prebuildcommands "..\\MetaGenerator\\Build\\Bin\\Debug\\netcoreapp3.1\\MetaGenerator.exe %{prj.location} analyze_dirs=Include gen_dir=Include dll_export=REFLECTION_DLL_EXPORT"
-
 	filter "configurations:*32"
 		architecture "x86"
 

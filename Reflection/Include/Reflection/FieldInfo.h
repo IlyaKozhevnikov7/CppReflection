@@ -44,7 +44,7 @@ namespace Reflection
 		}
 	};
 
-	class REFLECTION_API FieldRef
+	class REFLECTION_API FieldPtr
 	{
 	private:
 
@@ -53,16 +53,36 @@ namespace Reflection
 
 	public:
 
-		FieldRef() :
+		FieldPtr() :
 			m_Info(nullptr),
 			m_Offset(0)
 		{
 		}
 
-		FieldRef(const FieldInfo* info, size_t offset) :
+		FieldPtr(const FieldInfo* info, size_t offset) :
 			m_Info(info),
 			m_Offset(offset)
 		{
+		}
+
+		bool operator==(const FieldPtr& other) const noexcept
+		{
+			return m_Info == other.m_Info;
+		}
+		
+		bool operator!=(const FieldPtr& other) const noexcept
+		{
+			return m_Info != other.m_Info;
+		}
+
+		bool operator==(std::nullptr_t) const noexcept
+		{
+			return m_Info == nullptr;
+		}
+
+		bool operator!=(std::nullptr_t) const noexcept
+		{
+			return m_Info != nullptr;
 		}
 
 		const FieldInfo* GetInfo() const
@@ -93,7 +113,7 @@ namespace Reflection
 			if (object == nullptr && m_Info->IsStatic() == false)
 				return nullptr;
 
-			return (TReturn*)GetValueInternal((int8_t*)object);
+			return reinterpret_cast<TReturn*>(GetValueInternal(reinterpret_cast<int8_t*>(object)));
 		}
 
 	private:
