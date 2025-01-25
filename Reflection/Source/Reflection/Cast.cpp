@@ -27,6 +27,9 @@ namespace Reflection
 
 	void* Cast(void* ptr, TypePtr ptrType, TypePtr toType)
 	{
+		if (ptrType == toType)
+			return ptr;
+
 		size_t offset = 0;
 		if (GetUpCastOffset(ptrType, toType, offset)) // Try upcast from ptr type
 			return reinterpret_cast<int8_t*>(ptr) + offset;

@@ -48,15 +48,12 @@ namespace Reflection
 
 		/*
 		*	If the method is not static, the first argument is always
-		*	interpreted as a pointer to an object.
+		*	interpreted as a pointer to an instance.
 		*/
-		template<typename TReturn = void, typename ...TArgs>
+		template<typename TReturn = void, typename... TArgs>
 		TReturn Invoke(TArgs... args) const
 		{
-			if (IsStatic() == false)
-			{
-				CheckInstanceArgument(std::forward<TArgs>(args)...);
-			}
+			assert((CheckSignatureInternal<TReturn, TArgs...>(std::forward<TArgs>(args)...)));
 
 			ArgumentsPack<TArgs...> pack(std::forward<TArgs>(args)...);
 			InvokeResult<TReturn> result;
@@ -115,9 +112,45 @@ namespace Reflection
 				using InstanceType = std::remove_const_t<std::remove_pointer_t<PtrType>>;
 				auto ptr = *reinterpret_cast<void**>(args);
 
-				if (TypeOf<InstanceType>::Get()->GetActualType(ptr) != m_ObjectType)
-					Cast(ptr, TypeOf<PtrType>::Get(), m_ObjectType);
+				ptr = Cast(ptr, TypeOf<InstanceType>::Get(), m_ObjectType);
 			}
+		}
+
+		template<typename TReturn, typename... TArgs>
+		bool CheckSignatureInternal(TArgs... args) const
+		{
+			if (CheckReturnType<TReturn>() == false)
+				return false;
+
+			if (IsStatic())
+			{
+				if constexpr (sizeof...(TArgs) > 0)
+				{
+					return CheckParameterTypes<TArgs...>();
+				}
+				else
+				{
+					return CheckParameterTypes();
+				}
+			}
+			else
+			{
+				CheckInstanceArgument(std::forward<TArgs>(args)...);
+				if constexpr (sizeof...(TArgs) > 0)
+				{
+					return CheckParameterTypesWithoutInstance<TArgs...>();
+				}
+				else
+				{
+					return CheckParameterTypes();
+				}
+			}
+		}
+
+		template<typename T, typename... TArgs>
+		bool CheckParameterTypesWithoutInstance() const
+		{
+			return CheckParameterTypes<TArgs...>();
 		}
 
 		template<typename TSignature>

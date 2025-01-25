@@ -13,8 +13,3 @@ workspace "CppReflection"
 
 	include "MetaGenerator"
 	include "Reflection"
-
-	group "Examples"
-		include "Examples/AssemblyViewer"
-		include "Examples/ExampleApp"
-		include "Examples/ExampleDll"

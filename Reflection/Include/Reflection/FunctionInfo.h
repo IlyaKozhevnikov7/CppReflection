@@ -26,7 +26,19 @@ namespace Reflection
 		template<typename TReturn, typename ...TArgs>
 		bool CheckSignature() const
 		{
-			return m_Invoker.CheckReturnType<TReturn>() && m_Invoker.CheckParameterTypes<TArgs...>();
+			return CheckReturnType<TReturn>() && CheckParameterTypes<TArgs...>();
+		}
+
+		template<typename T>
+		bool CheckReturnType() const
+		{
+			return m_Invoker.CheckReturnType<T>();
+		}
+
+		template<typename ...TArgs>
+		bool CheckParameterTypes() const
+		{
+			return m_Invoker.CheckParameterTypes<TArgs...>();
 		}
 
 		void InvokeExplicit(const InvokeInfo* info = nullptr) const
