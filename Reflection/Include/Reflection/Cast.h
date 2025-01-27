@@ -21,4 +21,10 @@ namespace Reflection
 			return reinterpret_cast<TTo*>(Cast(reinterpret_cast<int8_t*>(from), TypeOf<TFrom>::Get(), TypeOf<TTo>::Get()));
 		}
 	}
+
+	template<typename TTo>
+	TTo* Cast(void* from, TypePtr ptrType)
+	{
+		return reinterpret_cast<TTo*>(Cast(reinterpret_cast<int8_t*>(from), ptrType, TypeOf<TTo>::Get()));
+	}
 }
