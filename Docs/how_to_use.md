@@ -56,7 +56,7 @@ To extract types statically, you must include ReflectionInclude file from the pr
 ```cpp
 #include "MyPlugin/Generation/MyPluginReflectionInclude.meta.h"
 ...
-// type extraction
+// Type extraction
 ```
 
 ### Dynamic extraction
@@ -94,7 +94,7 @@ if (const MethodInfo* method = type->GetMethod("Calculate"))
 	if (method->IsStatic() == false)
 	{
 		int32_t subOperation = 2;
-		ArgumentsPack pack(obj, subOperation); // for non-static methods, the 1st argument is always an instance ptr
+		ArgumentsPack pack(obj, subOperation); // For non-static methods, the 1st argument is always an instance ptr
 		int32_t result;
 
 		InvokeInfo invoke =
@@ -108,7 +108,8 @@ if (const MethodInfo* method = type->GetMethod("Calculate"))
 }
 
 lifetimeControl->Destroy(obj); // Invoke destructor
-free(obj); // free object memory
+free(obj); // Free object memory
+Assembly::Free(plugin); // Unload plugin
 ```
 
 ### Common features
@@ -160,15 +161,15 @@ if (type->IsEnum())
 #### Cast
 
 ```cpp
-TypePtr type = ... // extract type
-void* obj = ... // create and initialize object
+TypePtr type = ... // Extract type
+void* obj = ... // Create and initialize object
 
 IInterface* interfacePtr = Cast<IInterface>(obj, type);
 ```
 
 Note: when using cast, make sure that the type matches the type of the obj pointer. That is, if you want to cast an object to its original type, you need to pass interafce ptr and TypeOf<IInterface>
 ```cpp
-void* original = Cast(interfacePtr, // from ptr
-	TypeOf<IInterface>::Get(),  // from ptr type
-	type);			    // to type
+void* original = Cast(interfacePtr, // From ptr
+	TypeOf<IInterface>::Get(),  // From ptr type
+	type);			    // To type
 ```
