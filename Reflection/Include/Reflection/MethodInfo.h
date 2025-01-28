@@ -9,7 +9,7 @@ namespace Reflection
 		Static		= BIT<1>,
 		Const		= BIT<2>,
 		Virtual		= BIT<3>,
-		PureVirtual	= BIT<4>
+		PureVirtual = BIT<4>
 	};
 
 	class REFLECTION_API MethodInfo : public FunctionInfo
@@ -124,26 +124,18 @@ namespace Reflection
 
 			if (IsStatic())
 			{
-				if constexpr (sizeof...(TArgs) > 0)
-				{
-					return CheckParameterTypes<TArgs...>();
-				}
-				else
-				{
-					return CheckParameterTypes();
-				}
+				return CheckParameterTypes<TArgs...>();
+			}
+
+			if constexpr (sizeof...(TArgs) > 0)
+			{
+				CheckInstanceArgument(std::forward<TArgs>(args)...);
+				return CheckParameterTypesWithoutInstance<TArgs...>();
 			}
 			else
 			{
-				CheckInstanceArgument(std::forward<TArgs>(args)...);
-				if constexpr (sizeof...(TArgs) > 0)
-				{
-					return CheckParameterTypesWithoutInstance<TArgs...>();
-				}
-				else
-				{
-					return CheckParameterTypes();
-				}
+				assert(false, "A non-static method must have at least 1 argument - a pointer to an object");
+				return false;
 			}
 		}
 
