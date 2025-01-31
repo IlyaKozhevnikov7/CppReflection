@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Reflection/FunctionInfo.h"
+#include "Reflection/Cast.h"
 
 namespace Reflection
 {

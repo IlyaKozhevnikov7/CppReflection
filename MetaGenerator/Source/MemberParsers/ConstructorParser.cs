@@ -24,6 +24,7 @@ namespace MetaGenerator
             foreach (var match in matches)
             {        
                 infos[i].parameters = match[2];
+                infos[i].attributeInfos = ParseAttributes(match.Groups["attr"].Value);
                 ++i;
             }
         
