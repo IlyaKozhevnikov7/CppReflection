@@ -1,5 +1,6 @@
 *Build
-Examples/
+**/Generation
+!Reflection/Include/Generation
 
 # Visual Studio files
 .vs
